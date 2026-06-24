@@ -1,0 +1,138 @@
+# InfiniBand — Architecture, Generations, RDMA, AI Fabric, and Roadmap
+
+## Introduction: The Purpose-Built Fabric
+
+InfiniBand is the fabric that was designed, from its inception, for exactly the problem that AI training poses: moving enormous amounts of data between many computers with the lowest possible latency, zero packet loss, and direct memory-to-memory transfer that bypasses the CPU entirely. For two decades it was a specialist's technology — the interconnect of supercomputers and high-end storage, invisible to the broader computing world. Then AI training exploded, and InfiniBand found itself at the center of the most important buildout in the history of computing, because the GPU clusters that train large language models demand precisely the lossless, low-latency, RDMA-native fabric that InfiniBand provides natively and that Ethernet must strain to approximate.
+
+This chapter covers InfiniBand comprehensively: its history and the pivotal NVIDIA acquisition of Mellanox, its generational speed roadmap from SDR to XDR, its layered architecture (credit-based link layer, RDMA transport, subnet management, routing), the NVIDIA product family that dominates AI fabric (ConnectX NICs, Quantum switches, BlueField DPUs, NVLink/NVSwitch, SHARP in-network computing), and the detailed comparison between InfiniBand and Ethernet for AI that frames the central strategic question of the field. It builds on the RDMA concepts that File 08 develops further and feeds directly into the AI fabric architectures of File 15.
+
+## InfiniBand History and Ecosystem
+
+### Origins: A Merger of Visions
+
+InfiniBand was born in **1999** from the merger of two competing next-generation I/O efforts: **Future I/O** (backed by Compaq, IBM, and HP) and **Next Generation I/O** (backed by Intel and others). The combined effort, governed by the **InfiniBand Trade Association (IBTA)**, aimed to replace the aging PCI bus with a switched, serial, high-speed fabric that could serve both as a system I/O interconnect and as a network between systems. The first products shipped around 2001.
+
+The original grand ambition — to replace PCI as the universal I/O fabric inside every server — did not materialize; PCIe (File 03) won that role. But InfiniBand found a durable and growing home in **high-performance computing (HPC)** and **high-end storage**, where its low latency, high bandwidth, and native RDMA gave it decisive advantages over the Ethernet of the era. Through the 2000s and 2010s, InfiniBand became the dominant interconnect of the TOP500 supercomputers and a staple of latency-sensitive enterprise storage and database clusters. Ethernet won general computing; InfiniBand won the performance frontier.
+
+### The NVIDIA Acquisition of Mellanox
+
+The single most consequential event in InfiniBand's history was **NVIDIA's acquisition of Mellanox Technologies in 2020 for approximately $6.9 billion**. Mellanox was the dominant InfiniBand vendor — effectively the InfiniBand ecosystem, supplying the NICs (ConnectX), switches (Switch-IB, Quantum), and software. By acquiring Mellanox, NVIDIA gained control of both ends of the AI training system: the **GPU** that does the computation and the **interconnect** that binds GPUs into clusters.
+
+The strategic logic, fully apparent only in hindsight, was extraordinary. As AI training scaled from single GPUs to clusters of thousands, the interconnect became as important as the GPU, and NVIDIA now owned both. The acquisition gave NVIDIA the ConnectX-7 and BlueField-3 NICs, the Quantum-2 InfiniBand switch, and — crucially — the ability to **co-design** the GPU, the NIC, the switch, and the collective-communication software (NCCL) as a single, vertically integrated AI fabric. It also gave NVIDIA a near-monopoly on InfiniBand, a position of immense pricing power and strategic control that the company has leveraged across the AI boom. NVIDIA's networking business, post-acquisition, grew into a multi-billion-dollar revenue stream and a central pillar of its AI dominance.
+
+### Architectural Philosophy: Lossless by Design
+
+The deepest difference between InfiniBand and Ethernet is philosophical. **InfiniBand is lossless by design**: its link layer uses **credit-based flow control**, in which a sender may transmit only if it holds credits indicating the receiver has buffer space, so the receiver's buffer never overflows and packets are never dropped due to congestion. Losslessness is intrinsic, not bolted on.
+
+**Ethernet is best-effort by design**: it was built to drop packets under congestion and rely on upper-layer retransmission, and losslessness (for RoCEv2) must be retrofitted via PFC and congestion-control algorithms (DCQCN, etc.), with all the pathologies File 06 described. InfiniBand is also **RDMA-native** — RDMA is the fundamental transport model, not an overlay — whereas RoCE adapts InfiniBand's RDMA semantics onto Ethernet. This native, proactive, lossless, RDMA-first design is InfiniBand's core technical advantage for AI, and it is why, for the most demanding training clusters, InfiniBand long remained the default despite its cost and single-vendor ecosystem.
+
+## InfiniBand Generations and Speeds
+
+InfiniBand bandwidth is quoted per-lane and per-port, with ports typically aggregating 4 lanes (4×). The generational progression:
+
+| Gen | ~Year | Per-lane | 4× port | Signaling/encoding | NVIDIA product era |
+|---|---|---|---|---|---|
+| SDR (Single Data Rate) | 2001 | 2.5 Gbps | 10 Gbps | 8b/10b | First IB |
+| DDR (Double Data Rate) | 2005 | 5 Gbps | 20 Gbps | 8b/10b | — |
+| QDR (Quad Data Rate) | 2007 | 10 Gbps | 40 Gbps | 8b/10b | — |
+| FDR (Fourteen Data Rate) | 2011 | 14 Gbps | 56 Gbps | 64b/66b | ConnectX-3 |
+| EDR (Enhanced Data Rate) | 2015 | 25 Gbps | 100 Gbps | 64b/66b | ConnectX-4 |
+| HDR (High Data Rate) | 2018 | 50 Gbps (PAM4) | 200 Gbps | PAM4 | ConnectX-6, Quantum |
+| NDR (Next Data Rate) | 2022 | 100 Gbps (PAM4) | 400 Gbps | PAM4 | ConnectX-7, Quantum-2 |
+| XDR (eXtra Data Rate) | ~2025 | 200 Gbps (PAM4) | 800 Gbps | PAM4 | ConnectX-8, Quantum-3 |
+
+A few notes on the progression. The early generations (SDR through QDR) used **8b/10b encoding** with its 20% overhead; **FDR** switched to the far more efficient **64b/66b encoding** (3% overhead) and raised the per-lane rate to 14 Gbps (hence "Fourteen Data Rate"). **EDR** at 25 Gbps per lane gave the first "100G InfiniBand" (4×25), aligning with the 25G Ethernet lane era. **HDR** introduced **PAM4** at 50 Gbps per lane for 200G ports, powering NVIDIA DGX A100 systems. **NDR** doubled again to 100 Gbps per lane (400G ports), powering DGX H100. **XDR**, arriving mid-decade with ConnectX-8 and Quantum-3, reaches 200 Gbps per lane (800G ports), competing directly with 800G Ethernet for the AI fabric.
+
+There are also **half-width variants** — HDR100, NDR100 — that use 2 lanes instead of 4 (e.g., 2×50G = 100G, 2×100G = 200G) for server ports that do not need full 4× width, allowing a switch port to be split to serve more endpoints economically.
+
+## InfiniBand Architecture Deep Dive
+
+### The Link Layer: Credit-Based Flow Control
+
+InfiniBand's link layer is built around **Virtual Lanes (VLs)** and **credit-based flow control**. A physical link is divided into up to **16 virtual lanes (VL0–VL15)**, each with its own independent buffer and credit pool (VL15 is reserved for subnet management traffic). Credit-based flow control works as follows: the receiver advertises to the sender how much buffer space it has available, in credits; the sender may transmit only as much data as it has credits for; as the receiver drains its buffer and frees space, it returns credits. Because the sender never transmits more than the receiver can buffer, **packets are never dropped due to congestion** — losslessness is guaranteed at the link level, proactively.
+
+This contrasts sharply with Ethernet's PFC, which is **reactive**: Ethernet transmits freely until the receiver's buffer nearly overflows, then sends a PAUSE to stop the sender. InfiniBand's proactive credit scheme avoids the buffer-overflow brinkmanship and the congestion-spreading pathologies that plague PFC. The virtual lanes also provide native quality-of-service isolation, since each VL has independent buffering and flow control.
+
+### The Transport Layer: Connection Types
+
+InfiniBand's transport layer defines several **service types** that trade reliability, ordering, and scalability:
+- **Reliable Connection (RC)**: connection-oriented, guaranteed in-order delivery with acknowledgments — the workhorse for RDMA in HPC and AI, providing TCP-like reliability with RDMA semantics.
+- **Unreliable Connection (UC)**: connection-oriented but without acknowledgments; lower overhead where the application tolerates loss.
+- **Unreliable Datagram (UD)**: connectionless, no delivery guarantee — used for scalable multicast and for applications that manage reliability themselves; UD scales to many peers without per-connection state.
+- **Reliable Datagram (RD)**: a connectionless reliable service, rarely used in practice.
+- **eXtended Reliable Connection (XRC)**: an important scalability enhancement that lets multiple queue pairs share resources, mitigating the "N² queue-pair problem" — in a naive RC scheme, every process pair needs its own queue pair, so a job with N processes per node across M nodes needs an enormous number of QPs; XRC reduces this dramatically, essential for large-scale MPI jobs.
+
+### RDMA Verbs
+
+InfiniBand's programming model is the **verbs** API, which exposes RDMA operations directly to applications:
+- **RDMA Write**: the source's NIC writes data directly into a specified region of the remote node's memory, **without involving the remote CPU**. The remote CPU is not interrupted and consumes no cycles for the transfer.
+- **RDMA Read**: the source reads data directly from remote memory, again without remote CPU involvement.
+- **Atomic operations**: **Compare-and-Swap (CAS)** and **Fetch-and-Add** performed atomically on remote memory, enabling distributed synchronization primitives.
+- **Send/Receive**: two-sided operations where the receiver posts a receive buffer and the sender sends into it (the only operations requiring receiver participation).
+
+The defining feature is **kernel bypass**: verbs are executed from user space, with the application posting work requests directly to the NIC via memory-mapped I/O, bypassing the operating-system kernel entirely. No system calls, no kernel network stack, no data copies — the NIC DMAs data directly between application memory and the wire. This is what gives RDMA its sub-microsecond small-message latency and near-zero CPU overhead, and it is the foundation of high-performance distributed computing.
+
+### Queue Pairs and Memory Registration
+
+The core RDMA objects are:
+- **Queue Pair (QP)**: a Send Queue plus a Receive Queue — the endpoint of an RDMA connection. Applications post Work Requests (WRs) to these queues.
+- **Completion Queue (CQ)**: where the NIC posts completion notifications; the application polls the CQ to learn that operations have finished (polling, rather than interrupts, for lowest latency).
+- **Memory Region (MR)**: a region of application memory **registered** with the NIC so the NIC can DMA to/from it. Registration pins the memory (prevents it from being paged out) and produces keys (local and remote) that authorize access. Memory registration has overhead, and managing it efficiently (registration caching, on-demand paging) is an important performance consideration.
+- **Protection Domain (PD)**: an isolation boundary grouping QPs and MRs, preventing one application from accessing another's memory.
+- **Address Handle (AH)**: destination addressing information for unreliable datagram communication.
+
+### Subnet Management
+
+An InfiniBand network (a "subnet") is centrally managed by a **Subnet Manager (SM)** — either the open-source **OpenSM** or a vendor implementation — running on a management node. Unlike Ethernet's distributed, self-configuring control plane (where every switch runs BGP or learns MACs independently), InfiniBand uses **centralized management**: the SM discovers the topology, assigns each port a **16-bit LID (Local Identifier)**, computes the forwarding tables for every switch, configures QoS and partitions, and continuously monitors the subnet. The 16-bit LID space limits a single subnet to 65,536 endpoints; larger networks connect multiple subnets via InfiniBand routers.
+
+This centralized model is both a strength and a weakness. It enables globally optimal routing and tight control, but it requires running and protecting the SM, and it is operationally unfamiliar to network engineers steeped in Ethernet/IP tooling — a real factor in the hyperscalers' preference for Ethernet.
+
+### Routing
+
+InfiniBand switches forward based on the destination LID using a **Linear Forwarding Table** computed by the SM. The SM runs a **routing algorithm** appropriate to the topology — **MINHOP** for general topologies, **up/down routing** for fat-trees (packets go up to a common ancestor switch, then down, guaranteeing deadlock freedom), or **DFSSSP** and others for specific structures. NVIDIA's Quantum switches support **Adaptive Routing (AR)**, in which a switch can dynamically reroute packets onto less-congested paths rather than rigidly following the precomputed table, improving load balance for irregular and bursty traffic — a significant advantage for AI workloads whose collective patterns can otherwise create hot spots. Adaptive routing must be done carefully to preserve the lossless, ordered semantics that RDMA relies on.
+
+## NVIDIA AI Fabric Products
+
+NVIDIA's post-Mellanox networking portfolio is a vertically integrated AI fabric, co-designed with its GPUs and software.
+
+### ConnectX-7 and the NIC Line
+
+The **ConnectX-7** is NVIDIA's NDR-generation network adapter, supporting **400 Gbps InfiniBand (NDR) or 400 GbE**, with a PCIe 5.0 host interface. Beyond raw bandwidth, ConnectX-7 provides **hardware offload of MPI collectives** and supports **SHARP** (below), as well as extensive offloads for storage and networking. The **ConnectX-8**, the XDR-generation successor, advances to 800 Gbps. These NICs are the endpoints of the AI fabric, sitting in every GPU server and depositing data directly into GPU memory via **GPUDirect RDMA** (the NIC DMAs straight to/from GPU memory, bypassing the CPU and host memory entirely).
+
+### Quantum-2 and Quantum-3 Switches
+
+The **Quantum-2** is NVIDIA's NDR InfiniBand switch: **64 ports of 400 Gbps**, for **25.6 Tbps** of non-blocking switching capacity, with adaptive routing, FEC, and — critically — **in-switch SHARP computation**. Quantum-2 is the building block of the DGX SuperPOD fabric. The **Quantum-3**, the XDR-generation switch, advances to 800 Gbps per port and far higher aggregate capacity, extending NVIDIA's InfiniBand leadership into the 800G era and competing with 800G Ethernet AI fabrics.
+
+### SHARP — In-Network Computing
+
+**SHARP (Scalable Hierarchical Aggregation and Reduction Protocol)** is one of NVIDIA's most important fabric differentiators. In a conventional AllReduce, gradient data traverses the network multiple times as it is reduced (summed) across all participants — in a ring AllReduce, each piece of data crosses the fabric roughly twice. SHARP moves the **reduction operation into the switch ASICs**: as gradient data flows up a tree of switches, each switch sums the contributions from its children and forwards only the partial sum, so the data is reduced *in the network* rather than at the endpoints. The result is that the AllReduce completes with far less data movement — effectively roughly **doubling the effective bandwidth** for AllReduce compared to a ring algorithm, and eliminating the endpoint reduction step. Quantum-2 switches perform FP16/BF16/INT reductions in-network. SHARP is a concrete example of **in-network computing**, and it is a major reason InfiniBand fabrics deliver superior collective performance — a capability Ethernet fabrics are racing to match (File 15).
+
+### BlueField DPUs
+
+The **BlueField-3 DPU (Data Processing Unit)** combines a ConnectX-7 NIC with a 16-core Arm CPU complex on a single device, creating a programmable infrastructure processor. It offloads from the host CPU the entire "infrastructure" workload — storage virtualization (NVMe-oF), security (IPsec, TLS), network virtualization (Open vSwitch, VXLAN VTEP), and more — freeing host cores for application work and providing an isolation boundary between tenant workloads and infrastructure functions. The distinction between a **SmartNIC** (a NIC with some offload) and a **DPU** (a NIC with a full programmable CPU complex and an operating system) is exemplified by BlueField, which runs its own Linux and is programmable via NVIDIA's DOCA framework. DPUs are central to the security and virtualization architectures of File 19 and File 20.
+
+### NVLink and NVSwitch — The Scale-Up Fabric
+
+Distinct from InfiniBand (the scale-out fabric between nodes), **NVLink** is NVIDIA's **scale-up** fabric connecting GPUs within a node. **NVLink 4.0** provides **900 GB/s of bidirectional bandwidth per H100 GPU**, via 18 links per GPU, and the **NVSwitch (3rd Gen)** connects the 8 GPUs in a DGX H100 in a full all-to-all mesh at that bandwidth. **NVLink 5.0** (Blackwell generation) doubles per-link bandwidth, and the **GB200 NVL72** rack-scale system connects **72 Blackwell GPUs and 36 Grace CPUs** via 4th-generation NVLink switches into a single enormous scale-up domain, with **1.8 TB/s of bidirectional NVLink bandwidth per GPU**. NVLink's bandwidth — roughly twice the per-GPU figure of even the fastest scale-out fabric — is what makes tensor parallelism (which demands frequent, latency-sensitive, high-bandwidth collectives within a transformer layer) practical, and it is NVIDIA's most jealously guarded proprietary advantage, the target of the open UALink effort (File 24).
+
+## InfiniBand versus Ethernet for AI — Detailed Comparison
+
+The choice between InfiniBand and Ethernet for an AI training fabric is the field's defining decision, and it turns on a multidimensional trade-off:
+
+**Latency.** InfiniBand NDR delivers MPI latencies around **600 nanoseconds**, while RoCEv2 over Ethernet typically delivers **1–2 microseconds**. InfiniBand's lower and more deterministic latency benefits the latency-sensitive synchronous collectives that dominate training. The tail of the latency distribution matters even more than the mean (because collectives are barriers), and InfiniBand's credit-based, lossless design produces tighter tails.
+
+**Congestion control.** InfiniBand's **credit-based flow control is proactive and deterministic** — no drops, no PFC storms, predictable behavior under the synchronized bursts of AllReduce. RoCEv2's **DCQCN is reactive**, and even when well-tuned it experiences occasional microbursts and the risk of PFC pathologies. For all-to-all traffic at scale, InfiniBand's predictability is a real advantage, though Ethernet's congestion control is improving rapidly (HPCC, Ultra Ethernet).
+
+**Management and ecosystem familiarity.** InfiniBand requires a **Subnet Manager and a proprietary management plane** unfamiliar to most network operators. Ethernet uses **standard BGP/OSPF, OpenConfig, gNMI, and the entire ecosystem of Ethernet tooling** that operators already know. For hyperscalers running vast fleets with established operational practices, this familiarity is a powerful pull toward Ethernet.
+
+**Cost.** InfiniBand NDR switches and NICs are generally **more expensive** than comparable 400G Ethernet, reflecting both genuine engineering and NVIDIA's pricing power as the monopoly InfiniBand supplier. Ethernet benefits from ferocious multi-vendor competition (Broadcom, Marvell, Cisco, Arista, and others) that drives prices down.
+
+**Ecosystem openness.** The InfiniBand ecosystem is **NVIDIA-only**, a single point of supply and control. The Ethernet ecosystem spans many silicon vendors and system vendors, giving customers multi-sourcing, negotiating leverage, and freedom from single-vendor lock-in. This is perhaps the single biggest factor in the hyperscalers' Ethernet preference: they are deeply reluctant to build their most strategic infrastructure on a single vendor's proprietary, monopoly-priced fabric.
+
+### NVIDIA Spectrum-X: Ethernet on NVIDIA's Terms
+
+NVIDIA's response to the Ethernet groundswell is **Spectrum-X**, an Ethernet-based AI fabric that bundles the **Spectrum-4** Ethernet switch ASIC (51.2 Tbps) with **ConnectX-7** RoCEv2 NICs and **NVIDIA-proprietary congestion-management** enhancements (extensions to DCQCN, adaptive routing, and precise telemetry), claiming to deliver InfiniBand-like performance over a standard Ethernet fabric. Spectrum-X is a shrewd strategic hedge: if the market moves to Ethernet for AI, NVIDIA intends to capture that Ethernet fabric the same way it captured InfiniBand — by selling the NIC, the switch, and the congestion-control "secret sauce" together, locking the Ethernet AI cluster to NVIDIA's ecosystem. Microsoft's Azure has used Spectrum-X for certain GPU deployments. Spectrum-X versus the open Ultra Ethernet Consortium stack versus InfiniBand is the three-way contest that will determine the shape of the AI fabric market (File 15, File 23, File 24).
+
+## Conclusion: The Fabric That AI Made Indispensable
+
+InfiniBand spent two decades as a specialist's technology, excellent but niche, the interconnect of supercomputers far from the mainstream of computing. The AI revolution thrust it into the center of the industry, because the synchronous, lossless, low-latency, RDMA-native collective communication that AI training demands is precisely what InfiniBand was built to deliver — and NVIDIA's prescient acquisition of Mellanox gave it ownership of both the GPU and the fabric, a vertically integrated AI machine of unmatched performance and formidable pricing power. The open-Ethernet world, led by the hyperscalers and the Ultra Ethernet Consortium, is mounting a determined challenge, and NVIDIA is hedging with Spectrum-X. Whether InfiniBand retains its primacy, cedes ground to Ethernet, or coexists in a segmented market, its architectural ideas — credit-based losslessness, RDMA, kernel bypass, in-network reduction — have become the template that every AI fabric, InfiniBand or Ethernet, must now embody. The next chapter, on RDMA and RoCE, examines those ideas in the detail they deserve, and File 15 brings the InfiniBand-versus-Ethernet contest to its full resolution in the context of complete AI cluster architectures.
