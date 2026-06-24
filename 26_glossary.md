@@ -194,6 +194,132 @@ This glossary cross-references the key acronyms and terms used throughout the da
 
 **ZR / ZR+** — coherent pluggable optics for DCI (80 km / amplified longer reach). (Files 10, 12)
 
+## Additional Terms
+
+**AOC (Active Optical Cable)** — a permanently terminated optical cable with optics built into both ends, for fixed point-to-point links. (Files 02, 21)
+
+**ASIC (Application-Specific Integrated Circuit)** — a custom chip; here, switch/routing silicon. (File 14)
+
+**BER (Bit Error Rate)** — the fraction of bits received in error; targets ~10⁻¹² post-FEC. (Files 02, 06)
+
+**Baud** — symbols per second; for PAM4, data rate = 2 × baud. (Files 02, 06, 10)
+
+**BDF (Bus:Device:Function)** — the PCIe identifier for a function in the topology. (File 03)
+
+**CoWoS (Chip-on-Wafer-on-Substrate)** — TSMC's 2.5D silicon-interposer packaging. (File 05)
+
+**DCB (Data Center Bridging)** — the set of Ethernet enhancements (PFC, ETS, DCBX) for lossless operation. (File 02)
+
+**DAC (Direct-Attach Copper)** — passive copper cable for short links. (File 02)
+
+**DDR (in InfiniBand)** — Double Data Rate IB generation; (in memory) Double Data Rate DRAM. (Files 05, 07)
+
+**EAM (Electro-Absorption Modulator)** — InP modulator, integrated with a laser as an EML. (File 09)
+
+**ECL (External-Cavity Laser)** — a narrow-linewidth laser used in coherent and DWDM systems. (Files 09, 10)
+
+**ETS (Enhanced Transmission Selection, 802.1Qaz)** — bandwidth allocation among priority classes. (File 02)
+
+**FC (Fibre Channel)** — the enterprise storage-area-network protocol. (File 18)
+
+**FCoE (Fibre Channel over Ethernet)** — FC over Ethernet; limited market adoption. (File 18)
+
+**Foveros** — Intel's 3D die-stacking packaging. (File 05)
+
+**GBaud** — gigabaud; symbols per second in billions. (File 10)
+
+**GPUDirect** — NVIDIA technology for direct NIC-to-GPU-memory DMA. (Files 08, 15)
+
+**HDM (Host-managed Device Memory)** — CXL memory mapped into the host address space; HDM-H and HDM-DB variants. (File 04)
+
+**iSCSI** — SCSI block storage over TCP/IP. (File 18)
+
+**KGD (Known-Good-Die)** — a chiplet tested before assembly to protect package yield. (File 05)
+
+**LD (Logical Device)** — a CXL memory partition assigned to a host. (File 04)
+
+**LDPC (Low-Density Parity-Check)** — a soft-decision FEC code used in coherent optics. (File 10)
+
+**LTSSM (Link Training and Status State Machine)** — the PCIe link state machine. (File 03)
+
+**MFU (Model FLOPS Utilization)** — the fraction of peak FLOPS delivered to useful training. (File 15)
+
+**MPO/MTP** — multi-fiber optical connectors for parallel optics. (File 09)
+
+**MSA (Multi-Source Agreement)** — an industry agreement standardizing a form factor. (File 10)
+
+**NPO (Near-Package Optics)** — optics on the board adjacent to the ASIC, an intermediate step toward CPO. (File 13)
+
+**NVLS (NVLink SHARP)** — in-switch reduction over NVLink. (File 15)
+
+**OCP (Open Compute Project)** — the hyperscaler open-hardware community. (File 01)
+
+**ODSA (Open Domain-Specific Architecture)** — the OCP chiplet effort (BoW). (File 05)
+
+**OIF (Optical Internetworking Forum)** — defines electrical/optical interfaces (CEI, 400ZR, CPO). (File 01)
+
+**OSFP (Octal Small Form-factor Pluggable)** — a high-power transceiver form factor. (File 10)
+
+**OXC (Optical Cross-Connect)** — all-optical switching at fiber/path granularity. (File 11)
+
+**PD (Protection Domain)** — an RDMA isolation boundary. (File 07)
+
+**PIC (Photonic Integrated Circuit)** — integrated optical components on a chip (InP or silicon). (Files 10, 13)
+
+**QSFP-DD (Quad Small Form-factor Pluggable, Double Density)** — the dominant 400G transceiver form factor. (File 10)
+
+**SDM (Space-Division Multiplexing)** — multiplying fiber capacity via multiple cores/modes. (File 24)
+
+**SerDes (Serializer-Deserializer)** — the circuit converting parallel data to/from serial high-speed signaling. (Files 06, 14)
+
+**SOA (Semiconductor Optical Amplifier)** — a chip-scale optical amplifier. (File 09)
+
+**SoIC (System on Integrated Chips)** — TSMC's 3D hybrid-bonding packaging. (File 05)
+
+**SR-IOV (Single Root I/O Virtualization)** — PCIe virtualization exposing virtual functions. (File 03)
+
+**TLP (Transaction Layer Packet)** — the fundamental PCIe transaction unit. (File 03)
+
+**TSV (Through-Silicon Via)** — a vertical interconnect through a die for 3D stacking. (File 05)
+
+**VTEP (VXLAN Tunnel Endpoint)** — the overlay encapsulation/decapsulation point. (Files 02, 20)
+
+**WDM (Wavelength Division Multiplexing)** — carrying multiple wavelengths on one fiber (CWDM, DWDM). (File 09)
+
+**XDR (eXtra Data Rate)** — the ~800G-per-port InfiniBand generation. (File 07)
+
+## Reference Tables
+
+### Interconnect Hierarchy and Energy
+
+| Tier | Span | Energy/bit | Example |
+|---|---|---|---|
+| Die-to-die | mm | <0.5 pJ | UCIe advanced |
+| On-package | cm | ~1–2 pJ | NVLink, HBM |
+| Board | 10s cm | ~3–5 pJ | PCIe, CXL |
+| Rack/pod | m–10s m | ~5–15 pJ | Ethernet, IB |
+| Datacenter | 100s m | ~15 pJ | optical FR/LR |
+| Long-haul/subsea | km–1000s km | 100s pJ | coherent DWDM |
+
+### Signaling and Modulation
+
+| Scheme | Bits/symbol | Use |
+|---|---|---|
+| NRZ | 1 | ≤25G/lane electrical |
+| PAM4 | 2 | 50G–200G/lane electrical, direct-detect optics |
+| PM-QPSK | 4 (×2 pol) | long-haul coherent |
+| PM-16QAM | 8 | 400G coherent, metro/regional |
+| PM-64QAM | 12 | 800G coherent, short reach |
+
+### Ethernet/InfiniBand Speed Correspondence
+
+| Per-lane | Ethernet (4–8 lanes) | InfiniBand (4×) |
+|---|---|---|
+| 25G NRZ | 100G (4×) | EDR 100G |
+| 50G PAM4 | 200G/400G | HDR 200G |
+| 100G PAM4 | 400G/800G | NDR 400G |
+| 200G PAM4 | 800G/1.6T | XDR 800G |
+
 ---
 
-*This glossary is a quick reference; each term is developed in full in the file(s) noted. For a future revision, consider adding a complete index and a units/notation appendix.*
+*This glossary is a quick reference; each term is developed in full in the file(s) noted. The reference tables above summarize the interconnect-hierarchy energy costs, the signaling/modulation schemes, and the Ethernet/InfiniBand speed correspondence that recur throughout the database. For a future revision, consider adding a complete alphabetical index and a fuller units/notation appendix.*
