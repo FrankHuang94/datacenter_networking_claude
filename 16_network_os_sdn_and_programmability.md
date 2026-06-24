@@ -1,0 +1,63 @@
+# Network Operating Systems, SDN, and Programmability
+
+## Introduction: Software Eats the Network
+
+For most of networking's history, the software that ran a switch or router was inseparable from the hardware that ran it — a vertically integrated, proprietary stack sold as a single product, configured through a vendor-specific command-line interface, and upgraded on the vendor's schedule. The past fifteen years have seen this model steadily dismantled by the same forces that reshaped the rest of computing: disaggregation (separating software from hardware), open source, programmability, and automation. This chapter surveys the network-software landscape — traditional and open network operating systems, software-defined networking, intent-based networking, the P4 programmable-data-plane movement, streaming telemetry, and the YANG/OpenConfig data-modeling ecosystem — that increasingly determines how datacenter networks are built and operated. It connects to the switch silicon of File 14, the telemetry of File 22, and the virtualization of File 20.
+
+## Traditional Network Operating Systems
+
+The incumbent network operating systems remain dominant in enterprise and carrier networks:
+- **Cisco IOS / IOS-XE / IOS-XR**: the family that defined the industry's CLI. IOS-XE (enterprise) and IOS-XR (carrier/service-provider, modular and Linux-based) are the modern variants. Decades of operator familiarity and feature depth are Cisco's moat, but also a source of complexity and lock-in.
+- **Juniper Junos**: a FreeBSD-derived, single-image OS with a clean configuration model and strong service-provider heritage, prized for its consistency and its commit/rollback configuration discipline.
+- **Arista EOS (Extensible Operating System)**: a Linux-based, single-binary NOS that exposes its full state through a publish-subscribe database (SysDB), is deeply programmable in Python, and pioneered the cloud-friendly, automation-first switch software model that helped Arista win cloud and AI accounts (File 23).
+
+These NOSes are closed software stacks tightly coupled to the vendor's hardware and ASIC SDK. Their strength is integration and support; their weakness is the lock-in and the inability to run the operator's preferred software on commodity hardware — the gap that open NOSes fill.
+
+## Open Network Operating Systems
+
+The open-NOS movement decouples the network software from the hardware, letting operators run a common software stack across switches from many vendors built on merchant silicon:
+- **SONiC (Software for Open Networking in the Cloud)**: open-sourced by Microsoft in 2016 and now a Linux Foundation project, SONiC is the dominant open NOS. It runs on Broadcom, Marvell, NVIDIA/Mellanox, and other silicon through the **SAI (Switch Abstraction Interface)** — a standardized API that abstracts the underlying ASIC — and decomposes network functions into **containers**: FRRouting for BGP/OSPF, lldpd for LLDP, a DHCP relay, a teamd for LAG, and so on, orchestrated on a Linux base with a Redis-based central state database. SONiC is used by Microsoft Azure, Alibaba, Tencent, Dell, Edgecore, and many others, and it has fundamentally broken the NOS-hardware lock for hyperscalers and large enterprises. **SONiC-DASH (Disaggregated APIs for SONiC Hosts)** extends the model to DPUs/SmartNICs, defining APIs for offloading stateful services (NAT, load balancing, security policy) to programmable NICs.
+- **DENT**: a Linux Foundation NOS targeting enterprise and carrier edge/campus, Marvell-sponsored, built directly on the Linux kernel's **switchdev** model (which represents switch ports as Linux network interfaces and offloads forwarding to the ASIC via the kernel) — a "use the Linux networking stack natively" philosophy.
+- **OpenWRT** and other embedded NOSes serve the edge and the long tail.
+
+The open-NOS movement is one of the clearest expressions of the broader disaggregation trend: the network, like the server before it, is becoming a commodity-hardware-plus-open-software platform.
+
+## Software-Defined Networking (SDN)
+
+**SDN** was the movement, beginning around 2008–2011, that proposed separating the network's **control plane** (the logic that decides how to forward) from its **data plane** (the hardware that does the forwarding), centralizing the control plane in a software **controller** that programs the switches via an open protocol. **OpenFlow**, from the Open Networking Foundation, was the canonical southbound protocol: a controller installs flow rules (match-action entries) into switches' flow tables.
+
+OpenFlow's pure form ran into hard limits at scale: the latency and overhead of installing rules from a central controller, the controller as a bottleneck and single point of failure, and the limited flow-table capacity of switches. The grand vision of a fully centralized, OpenFlow-programmed network did not materialize for the general datacenter. But SDN's **ideas** triumphed in specific domains: **Google's B4**, a software-defined WAN backbone, uses centralized traffic engineering to drive its inter-datacenter links to near-100% utilization (impossible with distributed routing protocols), and is one of the great SDN success stories. SDN principles also underpin the overlay/controller model of network virtualization (File 20) and the centralized control of optical networks. The lesson: centralization wins where global optimization has high value and the control-plane scale is manageable (WAN traffic engineering, overlay orchestration), while distributed protocols (BGP) remain better for the high-scale, fast-converging datacenter underlay.
+
+## Intent-Based Networking
+
+**Intent-Based Networking (IBN)** raises the level of abstraction from configuration to **intent**: the operator declares *what* the network should do (e.g., "these workloads may communicate; this tenant is isolated; this path must have low latency"), and the system translates that intent into device configurations, continuously **verifies** that the actual network state matches the intent, and remediates drift. **Cisco DNA Center** and **Juniper Apstra** (acquired 2021) are leading IBN platforms. Apstra in particular brought a vendor-agnostic, intent-driven approach to datacenter fabric design and operation, with continuous validation against the declared intent. IBN closes the loop between design intent and operational reality — addressing the perennial problem that networks drift from their intended state through manual changes — and is increasingly important as fabrics grow too large to manage device by device.
+
+## P4 and the Programmable Data Plane
+
+**P4 (Programming Protocol-independent Packet Processors)** is the language that made the switch data plane itself programmable (File 14). Rather than a fixed parser and pipeline baked into silicon, a P4 program defines the headers to parse, the match-action tables, and the actions — compiled to run at line rate on a programmable ASIC (Intel/Barefoot Tofino) or smart NIC. The **P4Runtime** API lets a controller populate the tables at runtime. P4's use cases include:
+- **In-band Network Telemetry (INT)**: switches insert metadata (switch ID, queue depth, timestamps) into live packets for microsecond-granularity visibility (File 22), the basis of Alibaba's HPCC congestion control (File 06).
+- **Custom protocols and header processing**: parsing and acting on protocols the fixed pipeline doesn't natively support.
+- **Offloads**: RDMA ACK handling, segment-routing acceleration, load-balancing logic moved into the data plane.
+
+While the fully programmable Tofino lost the high-volume datacenter market to optimized fixed pipelines (File 14), P4's concepts — selective programmability, INT, runtime-populated tables — have permeated the industry, and the open-source P4 ecosystem (p4c compiler, P4Runtime, the P4.org foundation) continues to drive research and specialized deployments.
+
+## gNMI, OpenConfig, and Streaming Telemetry
+
+The management plane has been transformed by the shift from **polling** to **streaming** and from vendor CLIs to **vendor-neutral data models**:
+- **OpenConfig** is a vendor-neutral set of **YANG data models** for configuring and monitoring network devices, driven by an operator consortium (Google, Microsoft, AT&T, and others) and supported by all major vendors (Arista, Cisco, Juniper, Nokia, Ciena). OpenConfig lets an operator manage a multi-vendor network through one consistent model rather than per-vendor CLIs.
+- **gNMI (gRPC Network Management Interface)** is the modern transport for OpenConfig: a gRPC-based protocol for configuration (Get/Set) and, crucially, **streaming telemetry** via Subscribe (with ONCE, POLL, and STREAM modes). Devices **push** telemetry — per-port counters, buffer occupancy, congestion events, BGP state — to collectors continuously, at intervals shrinking from seconds toward 100 ms and even 10 ms.
+- The telemetry pipeline typically feeds a **Kafka** bus, **time-series databases** (InfluxDB, TimescaleDB, Prometheus), and **Grafana** dashboards for the network operations center, replacing the legacy **SNMP polling** model that could not deliver the granularity or scale modern fabrics require (File 22).
+
+This streaming, model-driven approach is essential for operating AI fabrics, where transient congestion events and microbursts must be observed at sub-second granularity to diagnose collective-communication stalls.
+
+## YANG, NETCONF, and Configuration Management
+
+Underlying the model-driven management is **YANG (RFC 6020)**, a language for modeling the configuration and state of network devices as a hierarchical, typed schema. Both vendor-specific YANG models (Cisco IOS-XR YANG, Juniper Junos YANG) and the vendor-neutral OpenConfig models exist. **NETCONF (RFC 6241)** is the older XML-based transport for YANG-modeled configuration (with candidate/running/startup datastores and commit/rollback), and **gNMI** is the modern gRPC-based alternative. The combination of YANG models, NETCONF/gNMI transport, and automation tooling (Ansible, Python libraries such as Juniper's PyEZ, and bespoke automation) enables the **infrastructure-as-code** management of networks at hyperscale — templating and version-controlling network configuration the way software is managed.
+
+## Network Verification and Assurance
+
+As networks grow too complex for manual reasoning, **formal verification** tools analyze configurations to prove properties before deployment: **Batfish** (open-source) models a network's configs and answers questions like "can A reach B?" or "is this ACL change safe?"; **Forward Networks** and **Cisco's Network Assurance Engine** build mathematical models of the network to verify that routing and policy match intent and to predict the impact of changes. These tools, used by operators including Microsoft Azure and large financial institutions, catch misconfigurations — a leading cause of outages — before they reach production, and they complement intent-based networking's continuous verification.
+
+## Conclusion
+
+Software has eaten the network as thoroughly as it has the rest of computing. The vertically integrated, CLI-managed, proprietary stack is giving way to disaggregated open NOSes (SONiC, DENT) on merchant silicon, to centralized control where global optimization pays (Google B4), to intent-based abstractions that close the loop between design and reality, to programmable data planes (P4) that let operators define forwarding behavior, and to model-driven, streaming management (OpenConfig, gNMI, YANG) that replaces polling and per-vendor CLIs with vendor-neutral, infrastructure-as-code operations. For AI fabrics in particular, this software transformation is not optional: the scale, the need for sub-second telemetry, and the demand for automated, verifiable operation make modern network software a prerequisite for building and running clusters of tens of thousands of accelerators. The next chapter turns from the general software stack to the specific, demanding operational craft of building and tuning the lossless RoCEv2 fabrics on which so much of AI training depends.
