@@ -1,0 +1,66 @@
+# Datacenter Interconnect (DCI), Metro, Long-Haul, and Submarine Cables
+
+## Introduction: Stitching the Cloud Together
+
+A single datacenter is no longer the unit of the cloud. Hyperscalers operate **regions** composed of multiple datacenter buildings connected by metro fiber, regions are interconnected across continents by long-haul terrestrial systems, and continents are joined by submarine cables crossing oceans. The traffic that flows over these links is enormous and growing: replication of data for durability and availability, content distribution, inter-region service communication, and — increasingly — the synchronization of AI training and inference across geographically distributed infrastructure. **Datacenter Interconnect (DCI)** is the family of technologies that carries this traffic, spanning a continuum from a few kilometers of dark fiber between buildings to thousands of kilometers of repeatered submarine cable. This chapter surveys that continuum: the DCI reach tiers and their technologies, the OTN and FlexE transport frameworks, metro and long-haul DWDM, and the submarine cable systems that are now, remarkably, owned outright by the hyperscalers themselves. It builds on the coherent optics of File 10 and the optical switching of File 11.
+
+## The DCI Reach Continuum
+
+DCI applications span a wide range of distances, each best served by different technology:
+
+- **Campus DCI (under ~10 km)**: connecting buildings within a campus, typically over operator-owned **dark fiber**. At these distances, direct-detect 400G/800G pluggables (DR4, FR4) or short-reach coherent suffice; no amplification is needed. This is the cheapest and simplest tier, dominated by gray (single-wavelength) or low-channel-count optics plugged directly into routers/switches.
+
+- **Metro DCI (10–80 km)**: connecting datacenters within a metro region. This is the sweet spot for **400G-ZR** single-span coherent pluggables, which reach ~80 km unamplified — a 400G coherent wavelength in a QSFP-DD/OSFP plugged directly into a router, no separate transport system needed. Metro DCI was revolutionized by ZR (File 10).
+
+- **Regional DCI (80–500 km)**: connecting datacenters across a region, requiring amplification (EDFA). **ZR+** pluggables (with their stronger DSP and FEC) reach these distances through amplified spans and ROADM networks, and traditional transponder systems also serve this tier.
+
+- **Continental / long-haul DCI (500–3000 km)**: connecting regions across a continent, requiring full coherent transport with multiple amplified spans, ROADMs, and often Raman amplification. This tier uses the highest-performance integrated coherent systems (Ciena WaveLogic, Nokia PSE, Infinera ICE) where the best DSP reach × capacity matters, alongside ZR+ where its reach suffices.
+
+This continuum maps directly onto the technology choices of File 10: pluggable coherent (ZR/ZR+) is displacing integrated transponders for the shorter tiers, while integrated systems with the best DSPs retain the longest and highest-capacity tiers.
+
+## OTN — Optical Transport Network
+
+**OTN (Optical Transport Network, ITU-T G.709)** is the carrier-grade digital wrapper that has traditionally framed optical transport. OTN defines a hierarchy of containers: **OTU (Optical Transport Unit)** frames carry client signals, with **OTU4** carrying 100G, and **OTUCn** (OTU-Cn) carrying n×100G for higher rates. Client signals are mapped into **ODU (Optical Data Unit)** containers (ODU0 through ODU4 and flex variants) that can be multiplexed and switched. OTN provides crucial carrier features: standardized **FEC**, extensive **performance monitoring (PM)** and **tandem connection monitoring (TCM)** overhead for fault isolation across multiple operators' segments, and robust **protection switching** (1+1, 1:N) that reroutes traffic around failures in tens of milliseconds.
+
+OTN's rich overhead and protection made it the backbone of carrier transport for decades. But its complexity is more than hyperscalers need: hyperscalers prefer simpler, higher-bandwidth framing and handle resilience at higher layers (in the IP/application layer), so they increasingly favor **FlexE** (below) and direct Ethernet-over-DWDM over full OTN. OTN remains dominant in traditional carrier networks and where multi-operator, carrier-grade SLAs and monitoring are required.
+
+## FlexE — Flexible Ethernet
+
+**FlexE (Flexible Ethernet, OIF)** is a shim layer between the Ethernet MAC and the physical layer that decouples the Ethernet rate from the underlying PHY rate. FlexE can **bond** multiple 100G PHYs into a higher-rate logical client (e.g., bonding to create a 400G or 1T pipe), **channelize** a high-rate PHY into multiple lower-rate clients (sub-rating, e.g., delivering a 25G or 250G service over a 100G PHY), and **mismatch** MAC and PHY rates using a calendar-based time-division mechanism. This flexibility lets operators provision arbitrary-rate services over standard Ethernet PHYs and DWDM wavelengths, with the simplicity of Ethernet rather than the overhead of OTN. FlexE (now at version 2.x) is used by Google, Microsoft, AT&T, and others in metro and DCI networks, exemplifying the hyperscaler preference for Ethernet-centric, simpler transport over traditional OTN.
+
+## Metro and Long-Haul DWDM
+
+The metro and long-haul DWDM systems that carry DCI and backbone traffic are where the coherent technology of File 10 is deployed at its highest performance. Modern systems carry **single-carrier 800G coherent wavelengths** (Ciena WaveLogic 5e/6, Nokia PSE-4/5, Infinera ICE6/7) and pack ~96 channels (or 160+ with C+L) onto a fiber pair. Key technologies that extend reach and capacity:
+- **C+L-band expansion**: adding L-band amplification and channels roughly doubles the wavelengths per fiber, the most direct way to add capacity to an existing fiber plant.
+- **Ultra-low-loss fiber** (G.654, File 09) for the longest amplifier spans.
+- **Raman + EDFA hybrid amplification** for ultra-long spans where EDFA-only OSNR is insufficient.
+- **Probabilistic constellation shaping and SD-FEC** (File 10) to operate close to the Shannon limit and adapt precisely to each link.
+
+These systems represent the high end of optical engineering, squeezing tens of terabits per second out of each fiber pair across thousands of kilometers, and they are the backbone over which the hyperscalers' inter-region traffic and the carriers' core traffic flow.
+
+## Submarine Cable Systems
+
+The most extraordinary optical systems are the **submarine cables** that cross the oceans, carrying the overwhelming majority of intercontinental data traffic. A submarine cable system is a feat of engineering operating in one of the harshest environments on Earth — the deep ocean floor — for a 25-year design life.
+
+### Anatomy of a Submarine System
+
+A submarine cable system comprises the **wet plant** (everything in the water) and the **dry plant** (the landing stations on shore). The **cable** itself bundles multiple **single-mode fiber pairs** within a structure of steel strength members, copper conductor (for power), and polyethylene insulation, with **armoring** added in shallow water near shore (where fishing and anchors threaten it). At intervals of **40–80 km**, **repeaters** containing **EDFAs** amplify all the fibers' signals; the repeaters are powered by a high-voltage DC current fed along the copper conductor from the shore-based **Power Feed Equipment**, which can push thousands of volts to energize an entire trans-ocean chain of repeaters. **Branching Units** allow a cable to split toward multiple landing points.
+
+The transition from analog to **digital coherent optics (DCO)** transformed submarine capacity: modern submarine systems use coherent transponders (often shore-based, with the wet plant being amplification only) that exploit all the coherent techniques — high-order modulation, PCS, SD-FEC, C-band (and increasingly C+L) — to maximize capacity. A key submarine design parameter is **spectral efficiency versus power**: submarine repeaters have limited electrical power (fed from shore), so submarine systems often optimize for the most bits per watt of repeater power, which can favor lower-order modulation (PM-QPSK) over more spans.
+
+### Capacity Records and Hyperscaler Cables
+
+Submarine capacity has grown explosively. Modern systems carry **hundreds of terabits per second per cable**; Infinera and others have demonstrated systems approaching or exceeding **1 Pbps** aggregate. The most striking development is the shift in ownership: where submarine cables were once built and owned by consortia of telecom carriers, the **hyperscalers now build and own private cables** to serve their own traffic:
+- **Google** has invested in numerous cables, including **Dunant** (transatlantic, 12 fiber pairs, ~250 Tbps), **Grace Hopper** (transatlantic, ~352 Tbps, with novel fiber-switching at landing), **Curie**, **Equiano** (West Africa), and **Firmina** (Americas).
+- **Meta** has invested in cables including **2Africa** (encircling the African continent, one of the largest cable projects ever) and **MAREA** (transatlantic, co-built with Microsoft).
+- **Microsoft**, **Amazon**, and others likewise invest in private and consortium cables.
+
+This hyperscaler ownership reflects the sheer scale of their traffic — they consume so much intercontinental bandwidth that owning the cable is cheaper than leasing capacity — and gives them control over routing, capacity, and upgrade timing. It is one of the clearest illustrations of how the cloud giants have become infrastructure companies at the deepest physical layer.
+
+### Submarine Technology Evolution
+
+Submarine technology continues to advance: **open cable systems** (where the wet plant is sold separately from the transponders, letting operators upgrade the shore-based coherent equipment over the cable's life to increase capacity — analogous to the open-line-system disaggregation of File 10), **C+L-band expansion** in the submarine environment, **Space-Division Multiplexing (SDM)** with more fiber pairs per cable (trading per-fiber capacity for more fibers, optimizing total capacity per watt of repeater power — a major design trend), and **subsea SDN control** for managing these systems remotely. The relentless growth of intercontinental data demand — now accelerated by AI data movement and distributed training — drives roughly a doubling of transatlantic capacity every few years, sustaining a continuous wave of new cable construction.
+
+## Conclusion
+
+Datacenter interconnect spans an extraordinary range — from a few kilometers of dark fiber between buildings on a campus to thousands of kilometers of repeatered cable across an ocean floor — yet it is all, fundamentally, the optical technology of Files 09 and 10 deployed at different scales. The reach tiers (campus, metro, regional, continental, subsea) each select their technology from the coherent toolkit: direct-detect pluggables and short-reach coherent for the shortest, ZR/ZR+ pluggables for metro and regional, and the highest-performance integrated coherent systems for long-haul and submarine. OTN and FlexE frame the transport; C+L expansion, ultra-low-loss fiber, and hybrid amplification extend the reach; and the hyperscalers, now owning entire submarine cable systems, have extended their infrastructure to the bottom of the sea. As AI workloads increasingly span regions and continents — for data gravity, for capacity, for resilience — DCI and submarine systems become ever more central to the AI infrastructure story, and the capacity growth they sustain is among the most reliable trends in all of networking. The next chapter turns to the technology that will reshape optics from the inside out: co-packaged optics and linear-drive optics, the response to the power crisis that the relentless bandwidth scaling of all these systems has created.
