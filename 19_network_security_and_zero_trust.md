@@ -1,0 +1,55 @@
+# Datacenter Network Security, Micro-Segmentation, and Zero Trust
+
+## Introduction: Security at Fabric Speed
+
+As datacenters concentrate ever more valuable data and computation, and as multi-tenancy and east-west traffic dominate, network security has shifted from a perimeter-defense problem to a pervasive, fabric-wide concern. The old model — a hard perimeter firewall guarding a trusted interior — fails against insider threats, lateral movement, and the reality that in a cloud datacenter there is no meaningful "inside." The modern model is **zero trust**: never trust, always verify, enforce least privilege everywhere, and inspect east-west traffic as rigorously as north-south. This chapter covers the technologies that secure the datacenter network — zero-trust architecture, micro-segmentation, DDoS protection, link and transport encryption (MACsec, IPsec), the offload of security to SmartNICs and DPUs, BGP security, and supply-chain security — at the line rates that modern fabrics demand. It connects to the virtualization of File 20 and the DPU architectures of File 07.
+
+## Zero Trust Architecture
+
+**Zero Trust Architecture (ZTA)**, codified in **NIST SP 800-207**, abandons the perimeter model in favor of continuous, identity-based verification. Its tenets: no implicit trust based on network location; every access request authenticated and authorized based on identity and context; least-privilege access; and continuous monitoring. In practice, ZTA replaces the flat, trusted internal network with **micro-segmentation** (below) and identity-aware access controls, and replaces the VPN (which grants broad network access once connected) with **ZTNA (Zero Trust Network Access)**, which grants access only to specific applications based on verified identity and device posture. Zero trust is now the dominant security paradigm for enterprise and cloud datacenters, reflecting the recognition that the network interior cannot be assumed safe.
+
+## Micro-Segmentation
+
+**Micro-segmentation** enforces security policy at the granularity of individual workloads rather than network segments — controlling and inspecting the **east-west** traffic between servers, VMs, and containers within the datacenter, which legacy perimeter firewalls never saw. Implementations include **VMware NSX** (distributed firewall enforced in the hypervisor vSwitch), **Cisco ACI** (policy-driven segmentation in the fabric), and **Illumio** (host-based segmentation). The enforcement point is moving to the **hypervisor vSwitch** or, increasingly, the **SmartNIC/DPU**, so that policy is applied close to the workload at line rate without hairpinning traffic to a centralized firewall. Micro-segmentation contains breaches by preventing lateral movement: even if one workload is compromised, segmentation limits what it can reach, dramatically reducing the blast radius.
+
+## DDoS Protection
+
+**Distributed Denial of Service (DDoS)** attacks threaten the availability of internet-facing datacenter services. Defenses span layers:
+- **Volumetric attacks** (overwhelming bandwidth) are mitigated by **scrubbing centers** (diverting traffic through filtering infrastructure), **BGP blackholing/flowspec** (dropping attack traffic at the network edge), and **Anycast** (distributing traffic across many locations to absorb and localize attacks).
+- **Application-layer attacks** (HTTP floods) and **amplification attacks** (exploiting DNS, NTP, memcached to multiply traffic) require application-aware filtering.
+- Major providers — **Cloudflare, Akamai, AWS Shield, Google Cloud Armor** — operate massive distributed scrubbing and Anycast infrastructure to absorb attacks that exceed any single datacenter's capacity.
+
+## MACsec and IPsec — Encryption in Transit
+
+Encrypting data in transit within and between datacenters is increasingly mandatory for compliance and defense in depth:
+- **MACsec (IEEE 802.1AE)** provides **Layer 2, hop-by-hop** encryption between directly connected devices. Modern switch ASICs (Broadcom Tomahawk and others) implement MACsec in hardware at **100G/400G line rate with under ~100 ns latency**, so it can be enabled pervasively without performance penalty. Hyperscalers use MACsec to encrypt internal datacenter and DCI links, protecting traffic on links that may traverse third-party fiber or facilities.
+- **IPsec** provides **Layer 3, end-to-end** encryption across routed networks. Because IPsec processing is CPU-intensive, it is increasingly **offloaded to SmartNICs/DPUs** (NVIDIA BlueField-3, Intel IPU) that perform IPsec (and TLS) encryption at line rate, freeing host CPUs and enabling pervasive encryption of inter-datacenter and tenant traffic.
+
+The combination of hardware MACsec (for link encryption) and DPU-offloaded IPsec/TLS (for end-to-end and tenant encryption) lets operators encrypt essentially all traffic without sacrificing throughput.
+
+## SmartNIC and DPU Security Offload
+
+The **SmartNIC/DPU** has become a central security enforcement point, offloading from the host CPU the security functions that would otherwise consume host cycles and that benefit from isolation from the (potentially compromised) host:
+- **NVIDIA BlueField-3** (File 07): IPsec/TLS offload, firewall and micro-segmentation policy enforcement, line-rate encryption.
+- **Intel IPU (Infrastructure Processing Unit)** (e.g., Mount Evans): infrastructure and security offload for cloud hosts.
+- **AWS Nitro**: the custom system that offloads networking, storage, and security from the host, including a dedicated security chip that establishes hardware root of trust and isolates the cloud infrastructure from the customer's instance.
+- **AMD Pensando**: P4-programmable DPUs for security and networking offload.
+
+By running security enforcement on the DPU — a separate trust domain from the host CPU — operators gain both performance (line-rate enforcement) and a stronger isolation boundary: even a fully compromised host cannot bypass the DPU's policy enforcement. This DPU-centric security model is one of the most important architectural shifts in cloud security.
+
+## BGP Security
+
+The routing control plane is itself a security surface. **BGP** has historically been vulnerable to route hijacks (a network announcing prefixes it does not own) and route leaks. Defenses:
+- **RPKI (Resource Public Key Infrastructure)** enables **Route Origin Validation (ROV)** — cryptographically verifying that the AS originating a prefix is authorized to do so — mitigating origin hijacks.
+- **BGPsec** extends this to validate the entire AS path (not just the origin), though its deployment is limited by complexity and overhead.
+- **Route filtering best practices** and **IRR (Internet Routing Registry)** filtering provide additional defense by validating advertisements against registered routing policy.
+
+Within the datacenter, where BGP is the underlay protocol (File 02), securing the control plane (authenticated sessions, careful policy, filtering) is part of fabric security, preventing a misconfigured or compromised device from disrupting routing.
+
+## Supply-Chain and Hardware Security
+
+The integrity of networking hardware itself is a growing concern. Defenses include **hardware attestation** and **root of trust**: **TPM 2.0** modules, **IEEE 802.1AR DevID** (cryptographic device identity), and **UEFI Secure Boot** for the network OS, which together verify that a device is genuine and running authorized, unmodified firmware/software. Vendors operate **PSIRT (Product Security Incident Response Team)** processes (Cisco, Arista, Juniper, NVIDIA) to manage and disclose vulnerabilities. Supply-chain security — ensuring that hardware has not been tampered with in manufacturing or transit, and that firmware is authentic — has become a national-security-level concern, reflected in export controls and procurement restrictions, and it intersects with the geopolitical dimensions of the component supply chain (Files 05, 21, 23).
+
+## Conclusion
+
+Network security in the datacenter has been transformed by the collapse of the perimeter and the dominance of east-west, multi-tenant traffic. The zero-trust paradigm — never trust, always verify, least privilege everywhere — is realized through micro-segmentation (enforcing policy per workload, increasingly in the hypervisor or DPU), pervasive encryption (hardware MACsec at the link layer, DPU-offloaded IPsec/TLS end-to-end), and DPU-centric enforcement that provides both line-rate performance and a trust boundary independent of the host. DDoS protection, BGP security (RPKI/ROV), and hardware supply-chain integrity round out the picture. The common thread is that security must operate **at fabric speed** — line-rate encryption and policy enforcement, offloaded to hardware (switch ASICs, DPUs) so that securing the network does not throttle it. As datacenters concentrate ever more valuable AI computation and data, and as the DPU becomes the universal infrastructure and security processor, network security is increasingly inseparable from the design of the fabric itself. The next chapter examines the network virtualization and overlay technologies that both create the multi-tenant environments security must protect and provide some of the mechanisms (segmentation, encapsulation) that protect them.
