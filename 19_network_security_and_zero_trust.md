@@ -29,6 +29,17 @@ The combination of hardware MACsec (for link encryption) and DPU-offloaded IPsec
 
 ## SmartNIC and DPU Security Offload
 
+```mermaid
+flowchart TB
+  subgraph Server["Physical server"]
+    Host["Host CPU / tenant workloads<br/>(untrusted)"]
+    Host --> DPU["DPU — separate trust domain<br/>firewall · microsegmentation · IPsec/TLS · NVMe-oF"]
+  end
+  DPU -->|"enforced at line rate"| Fabric["Datacenter fabric"]
+```
+
+*Figure 19.1 — The DPU as the new security perimeter. Security policy runs on the DPU — a trust domain isolated from the host — so even a fully compromised host cannot bypass enforcement. Encryption (MACsec in the switch ASIC, IPsec/TLS in the DPU) runs at line rate.*
+
 The **SmartNIC/DPU** has become a central security enforcement point, offloading from the host CPU the security functions that would otherwise consume host cycles and that benefit from isolation from the (potentially compromised) host:
 - **NVIDIA BlueField-3** (File 07): IPsec/TLS offload, firewall and micro-segmentation policy enforcement, line-rate encryption.
 - **Intel IPU (Infrastructure Processing Unit)** (e.g., Mount Evans): infrastructure and security offload for cloud hosts.

@@ -6,6 +6,16 @@ The preceding chapters established the theory: RDMA needs losslessness (File 08)
 
 ## End-to-End RoCEv2 Fabric Design
 
+```mermaid
+flowchart TB
+  FEC["Layer 1: Physical FEC<br/>corrects bit errors (ns)"]
+  CC["Layer 2: Congestion control<br/>ECN/DCQCN keeps queues short (us) — PRIMARY"]
+  PFC["Layer 3: PFC PAUSE<br/>last-resort, prevents drop (per-link) — BACKSTOP"]
+  FEC --> CC --> PFC
+```
+
+*Figure 17.2 — The three-layer defense against packet loss in a lossless RoCE fabric. Each layer backstops the one before; the craft is tuning them so graceful ECN/DCQCN control acts first and PFC (with its deadlock/congestion-spreading risks) almost never fires.*
+
 A production AI RoCE fabric is designed top to bottom for non-blocking, lossless, low-latency collective communication:
 - **Server NICs**: RoCEv2-capable NICs with hardware congestion control and GPUDirect RDMA — NVIDIA **ConnectX-7** (400G), Marvell **FastLinQ**, or Intel **E810**-class adapters — one or more per GPU, providing the per-GPU scale-out bandwidth (400–800 Gbps).
 - **Top-of-rack (leaf) switches**: high-radix, low-latency switches with adequate buffering and robust PFC/ECN support — e.g., Arista 7050X/7060X, Cisco Nexus 9300, Juniper QFX5220 — typically built on Broadcom Trident/Tomahawk or equivalents.
@@ -25,6 +35,13 @@ The design philosophy: provision so generously (non-blocking, deep enough buffer
 PFC must be treated as a **last-resort safety net**, not the primary congestion mechanism — the goal is for congestion control to keep queues short enough that PFC almost never triggers.
 
 ## ECN Marking Configuration
+
+```mermaid
+flowchart LR
+  Q0["Empty"] --> QE["ECN marking zone<br/>start ~20-30% buffer"] --> QP["PFC PAUSE threshold<br/>~80% buffer"] --> QF["Full = DROP (must never reach for RDMA)"]
+```
+
+*Figure 17.1 — Switch buffer thresholds for a lossless RoCE queue. ECN marking begins well before the buffer fills, so DCQCN reduces sender rate gracefully; the PFC PAUSE threshold sits higher as a last-resort backstop; the drop point must never be reached for RDMA traffic. Separating the ECN and PFC thresholds is the core of the tuning.*
 
 The primary congestion mechanism is **ECN-based DCQCN** (File 06), and configuring the switches' ECN marking is critical:
 - Switches mark ECN using a **WRED (Weighted Random Early Detection)** profile on the RDMA queue, defined by a **minimum threshold** (below which no marking), a **maximum threshold** (above which all packets are marked), and a **marking probability** that ramps between them.

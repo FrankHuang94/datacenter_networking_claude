@@ -18,6 +18,21 @@ FC's extensions and decline-and-persistence are instructive. **FCoE (Fibre Chann
 
 ## NVMe-over-Fabrics Architecture
 
+```mermaid
+flowchart LR
+  subgraph H["Compute host (NVMe initiator)"]
+    App["Application"] --> Q["NVMe submission/completion queues"]
+  end
+  Q ==>|"NVMe/RDMA over RoCE (~10-20 us)<br/>or NVMe/TCP (~100 us)"| T["Target controller"]
+  subgraph S["Storage (JBOF / array)"]
+    T --> NS1["Namespace"]
+    T --> NS2["Namespace"]
+    T --> NS3["Namespace"]
+  end
+```
+
+*Figure 18.1 — NVMe-over-Fabrics carries NVMe's queue model across a network. NVMe/RDMA (over RoCE or InfiniBand) reaches near-local latency, enabling storage disaggregation; NVMe/TCP trades latency for fabric simplicity. The fast fabric is what lets compute and storage capacity scale independently (composable infrastructure).*
+
 **NVMe (Non-Volatile Memory Express)**, the protocol designed for PCIe-attached flash (File 03), revolutionized storage with its massively parallel queue model (up to 65,535 I/O queues). **NVMe-over-Fabrics (NVMe-oF)** extends this model across a network, carrying NVMe's submission/completion queue semantics over a fabric transport so that remote flash can be accessed with the same low-overhead, highly parallel model as local NVMe. The NVMe controller model — namespaces, submission and completion queues, the streamlined command set — is preserved across the fabric, with an **NVMe initiator** (host) and **NVMe target** (storage controller or flash device).
 
 NVMe-oF defines several **transports**:

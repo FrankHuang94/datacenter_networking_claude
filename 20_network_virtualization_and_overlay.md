@@ -6,6 +6,21 @@ Network virtualization decouples the logical network that workloads see from the
 
 ## VXLAN — The Dominant Datacenter Overlay
 
+```mermaid
+flowchart TB
+  subgraph Overlay["Tenant virtual network (24-bit VNI)"]
+    VA["VM / container A"]
+    VB["VM / container B"]
+  end
+  VA --> VT1["VTEP (encap)"]
+  VT1 ==>|"VXLAN over UDP/IP — underlay routes on outer header, ECMP via UDP src-port entropy"| VT2["VTEP (decap)"]
+  VT2 --> VB
+  BGP["BGP EVPN control plane"] -. "distributes MAC/IP reachability" .- VT1
+  BGP -. "distributes MAC/IP reachability" .- VT2
+```
+
+*Figure 20.1 — VXLAN decouples the tenant's logical network (top) from the physical underlay. VTEPs encapsulate frames in UDP/IP so the underlay routes them without understanding tenants; BGP EVPN is the control plane. Hardware VTEP offload (NIC/DPU/switch) is required to do this at line rate (File 19).*
+
 **VXLAN (Virtual Extensible LAN, RFC 7348)** is the workhorse datacenter overlay. It encapsulates a complete Layer 2 Ethernet frame inside an outer **UDP/IP** packet (outer UDP destination port **4789**), with an 8-byte VXLAN header carrying a **24-bit VNI (VXLAN Network Identifier)** — 16 million virtual segments, versus the 4,096 of VLANs. The encapsulation/decapsulation endpoint is the **VTEP (VXLAN Tunnel Endpoint)**, which can reside in a hypervisor virtual switch, in a NIC (hardware offload), or in a physical switch ASIC (Broadcom Trident/Tomahawk and NVIDIA hardware VTEPs). The total overhead (~50 bytes) makes hardware offload and jumbo frames important.
 
 A critical detail is **entropy for load balancing**: the VTEP sets the **outer UDP source port** as a hash of the inner flow, so that the underlay's ECMP (File 02) spreads different inner flows across different physical paths — the same entropy mechanism whose failure causes the elephant-flow imbalance of RoCE fabrics (File 17). VXLAN thus lets the underlay load-balance tenant traffic without understanding it.

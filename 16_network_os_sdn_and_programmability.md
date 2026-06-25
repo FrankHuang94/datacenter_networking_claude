@@ -15,6 +15,18 @@ These NOSes are closed software stacks tightly coupled to the vendor's hardware 
 
 ## Open Network Operating Systems
 
+```mermaid
+flowchart TB
+  Apps["Containerized services<br/>FRRouting (BGP), lldpd, DHCP relay, teamd"]
+  DB["Redis central state DB"]
+  Orch["orchagent / syncd"]
+  SAI["SAI (Switch Abstraction Interface)"]
+  ASIC["Merchant ASIC (Broadcom / Marvell / NVIDIA)"]
+  Apps --> DB --> Orch --> SAI --> ASIC
+```
+
+*Figure 16.1 — The SONiC open-NOS stack. SAI is the vendor-neutral waist that decouples the network OS from the silicon, letting one NOS run across many vendors' ASICs and breaking the historical NOS-hardware lock-in.*
+
 The open-NOS movement decouples the network software from the hardware, letting operators run a common software stack across switches from many vendors built on merchant silicon:
 - **SONiC (Software for Open Networking in the Cloud)**: open-sourced by Microsoft in 2016 and now a Linux Foundation project, SONiC is the dominant open NOS. It runs on Broadcom, Marvell, NVIDIA/Mellanox, and other silicon through the **SAI (Switch Abstraction Interface)** — a standardized API that abstracts the underlying ASIC — and decomposes network functions into **containers**: FRRouting for BGP/OSPF, lldpd for LLDP, a DHCP relay, a teamd for LAG, and so on, orchestrated on a Linux base with a Redis-based central state database. SONiC is used by Microsoft Azure, Alibaba, Tencent, Dell, Edgecore, and many others, and it has fundamentally broken the NOS-hardware lock for hyperscalers and large enterprises. **SONiC-DASH (Disaggregated APIs for SONiC Hosts)** extends the model to DPUs/SmartNICs, defining APIs for offloading stateful services (NAT, load balancing, security policy) to programmable NICs.
 - **DENT**: a Linux Foundation NOS targeting enterprise and carrier edge/campus, Marvell-sponsored, built directly on the Linux kernel's **switchdev** model (which represents switch ports as Linux network interfaces and offloads forwarding to the ASIC via the kernel) — a "use the Linux networking stack natively" philosophy.
@@ -23,6 +35,17 @@ The open-NOS movement decouples the network software from the hardware, letting 
 The open-NOS movement is one of the clearest expressions of the broader disaggregation trend: the network, like the server before it, is becoming a commodity-hardware-plus-open-software platform.
 
 ## Software-Defined Networking (SDN)
+
+```mermaid
+flowchart TB
+  Ctrl["SDN Controller (centralized control plane)"]
+  Ctrl -->|"OpenFlow / P4Runtime / gNMI"| S1["Switch (data plane)"]
+  Ctrl -->|"southbound API"| S2["Switch (data plane)"]
+  Ctrl -->|"southbound API"| S3["Switch (data plane)"]
+  App["Apps / orchestration"] -->|"northbound API"| Ctrl
+```
+
+*Figure 16.2 — The SDN model separates a centralized control plane from the switches' data plane. Pure OpenFlow lost the general datacenter (BGP scales better for the underlay), but the idea won decisively for WAN traffic engineering (Google B4) and overlay orchestration.*
 
 **SDN** was the movement, beginning around 2008–2011, that proposed separating the network's **control plane** (the logic that decides how to forward) from its **data plane** (the hardware that does the forwarding), centralizing the control plane in a software **controller** that programs the switches via an open protocol. **OpenFlow**, from the Open Networking Foundation, was the canonical southbound protocol: a controller installs flow rules (match-action entries) into switches' flow tables.
 
