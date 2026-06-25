@@ -47,7 +47,6 @@ flowchart TB
   B2["Aggregation block 2"] --- OCS
   B3["Aggregation block 3"] --- OCS
   B4["Aggregation block 4"] --- OCS
-  OCS -. "topology re-wired per traffic/collective pattern" .- OCS
 ```
 
 *Figure 11.1 — Optical circuit switching (Google's Apollo/Palomar) interposes a reconfigurable MEMS optical switch between aggregation blocks, so the fabric topology can be re-wired in milliseconds to match the traffic — or, for AI, the collective-communication pattern of a job (Files 06, 15). It also enables incremental, heterogeneous fabric upgrades.*

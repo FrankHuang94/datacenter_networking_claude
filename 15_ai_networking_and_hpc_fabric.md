@@ -54,8 +54,8 @@ flowchart TB
     b0["GPU"] --- nsw2["NVSwitch"]
     b1["GPU"] --- nsw2
   end
-  nsw1 ---|"Scale-out: InfiniBand / RoCE, 400-800 Gb/s per GPU"| SPINE["Clos spine"]
-  nsw2 --- SPINE
+  nsw1 -->|"Scale-out: InfiniBand / RoCE, 400-800 Gb/s per GPU"| SPINE["Clos spine"]
+  nsw2 --> SPINE
 ```
 
 *Figure 15.1 — The two-tier AI fabric. Tensor parallelism (frequent, latency-sensitive collectives) is mapped inside the high-bandwidth scale-up domain (NVLink); data and pipeline parallelism run across the scale-out fabric (InfiniBand/RoCE). Enlarging the scale-up domain (8 GPUs in DGX H100, 72 in GB200 NVL72) lets bigger models be served at NVLink bandwidth.*

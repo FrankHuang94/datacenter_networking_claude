@@ -11,9 +11,9 @@ This chapter covers the chiplet revolution and its interconnects: the rationale 
 ```mermaid
 flowchart TB
   subgraph PKG["Accelerator package on silicon interposer (CoWoS)"]
-    HBM1["HBM stack<br/>(8-12 DRAM dies + base die)"] ---|"1024-bit, ~1 pJ/bit"| GPU["GPU compute die(s)"]
-    GPU ---|"UCIe / Infinity Fabric<br/>die-to-die"| IOD["I/O die"]
-    GPU --- HBM2["HBM stack"]
+    HBM1["HBM stack<br/>(8-12 DRAM dies + base die)"] -->|"1024-bit, ~1 pJ/bit"| GPU["GPU compute die(s)"]
+    GPU -->|"UCIe / Infinity Fabric<br/>die-to-die"| IOD["I/O die"]
+    HBM2["HBM stack"] --> GPU
   end
   IOD -->|"PCIe / CXL / NVLink off-package"| World["Rest of system"]
 ```

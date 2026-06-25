@@ -174,7 +174,7 @@ flowchart TB
   SW --> NVMe1["NVMe SSD (x4)"]
   SW --> NVMe2["NVMe SSD (x4)"]
   SW --> Acc["Accelerator (x8)"]
-  GPU -. "NVLink, not PCIe (900 GB/s)" .- GPU2["peer GPU"]
+  GPU -.->|"NVLink, not PCIe"| GPU2["peer GPU"]
 ```
 
 *Figure 3.2 — PCIe is a strict tree rooted at the CPU's root complex. Note that GPU-to-GPU traffic uses NVLink (dashed), not PCIe — PCIe is the CPU-to-GPU staging and GPU-to-NIC path, not the GPU-to-GPU training path (File 07).*

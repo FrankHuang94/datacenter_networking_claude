@@ -15,8 +15,8 @@ flowchart TB
   VA --> VT1["VTEP (encap)"]
   VT1 ==>|"VXLAN over UDP/IP — underlay routes on outer header, ECMP via UDP src-port entropy"| VT2["VTEP (decap)"]
   VT2 --> VB
-  BGP["BGP EVPN control plane"] -. "distributes MAC/IP reachability" .- VT1
-  BGP -. "distributes MAC/IP reachability" .- VT2
+  BGP["BGP EVPN control plane"] -.->|"distributes MAC/IP reachability"| VT1
+  BGP -.->|"distributes MAC/IP reachability"| VT2
 ```
 
 *Figure 20.1 — VXLAN decouples the tenant's logical network (top) from the physical underlay. VTEPs encapsulate frames in UDP/IP so the underlay routes them without understanding tenants; BGP EVPN is the control plane. Hardware VTEP offload (NIC/DPU/switch) is required to do this at line rate (File 19).*
