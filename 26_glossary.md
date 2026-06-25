@@ -290,6 +290,13 @@ This glossary cross-references the key acronyms and terms used throughout the da
 
 ## Reference Tables
 
+```mermaid
+flowchart LR
+  Die["Die-to-die<br/>UCIe/HBM"] --> Pkg["On-package<br/>NVLink"] --> Board["Board<br/>PCIe/CXL"] --> Rack["Rack<br/>Ethernet/IB"] --> DC["Datacenter<br/>optical"] --> WAN["Metro/Long-haul<br/>coherent"] --> Sub["Subsea<br/>repeatered DWDM"]
+```
+
+*Figure 26.1 — Quick-reference view of the interconnect hierarchy that organizes the whole database, from die-to-die to subsea (full detail and energy/latency figures in File 01, Figure 1.1).*
+
 ### Interconnect Hierarchy and Energy
 
 | Tier | Span | Energy/bit | Example |

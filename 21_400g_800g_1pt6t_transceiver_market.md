@@ -37,6 +37,13 @@ The geopolitical dimension is significant and intertwined with the broader semic
 
 ## Key Technology Trends
 
+```mermaid
+flowchart LR
+  DAC["Passive DAC<br/>1-3 m"] --> AEC["AEC<br/>~7 m"] --> SR["SR multimode<br/>50-100 m"] --> DR["DR<br/>500 m"] --> FR["FR<br/>2 km"] --> LR["LR<br/>10 km"] --> ZR["ZR/ZR+ coherent<br/>80+ km"]
+```
+
+*Figure 21.1 — The interconnect-media reach spectrum. As per-lane rates rise, copper reach collapses and the crossover points shift toward optics, growing the transceiver and active-cable markets. LPO and CPO (File 13) emerge where the pluggable's power envelope itself becomes the wall.*
+
 Several technology trends are reshaping the transceiver market:
 - **LPO (Linear Drive Optics)** is forecast to grow from essentially 0% in 2022 to a meaningful share (20%+) of the 800G market by the mid-2020s, as the near-term power win (File 13).
 - **CPO (Co-Packaged Optics)** enters pilot deployment at hyperscalers in 2025–2026, threatening pluggables at the highest bandwidths (File 13).

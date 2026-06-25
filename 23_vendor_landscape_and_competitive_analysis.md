@@ -4,6 +4,26 @@
 
 The datacenter networking industry is a contest among a few dozen companies for control of one of the most strategically important and rapidly growing markets in technology. The stakes have risen with AI: networking is no longer plumbing but a determinant of AI-cluster performance and economics, and the companies that supply the silicon, systems, and optics for AI fabrics are capturing extraordinary value. This chapter profiles the major vendors across the segments — switch and router systems (Cisco, Arista, Juniper), AI fabric and NICs (NVIDIA), switch and component silicon (Broadcom, Marvell), and optical systems and components (Ciena, Nokia, Infinera, Lumentum, Coherent) — covering each one's business, products, competitive moat, strategy, M&A history, and roadmap, and concludes with market-share summaries by segment. It synthesizes the technology threads of the entire database into the competitive dynamics that will determine the industry's future.
 
+### The Supply Stack at a Glance
+
+```mermaid
+flowchart TB
+  Sys["Systems / fabric<br/>Cisco · Arista · Juniper · NVIDIA"]
+  Si["Switch silicon<br/>Broadcom (~55-60%) · Marvell · NVIDIA"]
+  OptSys["Optical systems / DCI<br/>Ciena · Nokia · Infinera"]
+  Comp["Optical components<br/>Lumentum + Coherent (WSS/laser duopoly)"]
+  DSP["Coherent DSP<br/>Acacia/Cisco · Marvell/Inphi · Ciena · Nokia"]
+  Found["Foundry + packaging: TSMC (CoWoS)<br/>HBM: SK Hynix · Samsung · Micron"]
+  Sys --> Si
+  Sys --> OptSys
+  OptSys --> Comp
+  OptSys --> DSP
+  Si --> Found
+  Comp --> Found
+```
+
+*Figure 23.1 — Who supplies what, and where the chokepoints (profit pools) sit: Broadcom in switch silicon, NVIDIA in AI fabric, the Lumentum/Coherent duopoly in optical components, and the SK Hynix-led oligopoly in HBM. The open-standards movements (Ultra Ethernet, UALink, open optical, SONiC) aim to dissolve these chokepoints.*
+
 ## Cisco Systems
 
 **Cisco** is the incumbent giant of networking, with total revenue around **$52 billion** and a networking franchise that remains dominant in enterprise and carrier markets and present (if challenged) in cloud. Its datacenter and routing portfolio spans the **Nexus 9000** (datacenter switching, in ACI fabric or standalone NX-OS modes), **Nexus 3000** (low-latency switches for trading), **ASR 9000** (service-provider routing, using Broadcom Jericho2), the **Cisco 8000** series (built on its own **Silicon One** ASIC), the **Catalyst 9000** (enterprise), and a coherent optics lineup (Silicon One G100/G200 DSP and Acacia ZR+ pluggables).

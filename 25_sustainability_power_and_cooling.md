@@ -6,6 +6,16 @@ Power is the ultimate constraint on datacenter networking. Every bit moved costs
 
 ## Networking's Share of Datacenter Power
 
+```mermaid
+pie showData
+  title Datacenter power split (approximate)
+  "Servers / compute" : 70
+  "Networking (switches, optics, NICs)" : 12
+  "Cooling and power-delivery overhead" : 18
+```
+
+*Figure 25.1 — Networking is a minority of datacenter power but large in absolute terms (kilowatts per rack-row, megawatts per AI cluster) and growing with AI. Co-packaged optics (File 13) can save ~150 W per 51.2T switch by eliminating the front-panel SerDes term — hundreds of kilowatts across a datacenter.*
+
 In a typical datacenter, servers consume the majority of IT power (~70%), networking a meaningful slice (~10–15%), and cooling and power-delivery overhead the rest (captured in the PUE, Power Usage Effectiveness, metric). The networking share, while smaller than compute, is substantial in absolute terms: a 400G switch draws on the order of 400 W, its transceivers another ~2 kW (4 W × ~512 ports), and the NICs across a rack of servers tens of kilowatts. As fabrics scale to 800G and beyond, and as AI fabrics demand non-blocking, high-radix topologies with far more switches and transceivers per GPU, networking's absolute power grows even if its percentage share holds.
 
 ## AI Networking Power Escalation

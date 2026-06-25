@@ -6,11 +6,31 @@ A datacenter network spanning hundreds of thousands of ports, carrying the synch
 
 ## In-band Network Telemetry (INT)
 
+```mermaid
+flowchart LR
+  Pkt["Live packet"] --> S1["Switch 1<br/>append: ID, queue depth, timestamp"]
+  S1 --> S2["Switch 2<br/>append metadata"]
+  S2 --> S3["Switch 3<br/>append metadata"]
+  S3 --> Coll["Receiver / collector<br/>reads full per-hop INT stack"]
+```
+
+*Figure 22.1 — In-band Network Telemetry embeds per-hop metadata (queue depth, timestamps) into live packets, giving microsecond-granularity visibility into the exact path and congestion each packet experienced — the basis of Alibaba's HPCC congestion control (File 06).*
+
 **In-band Network Telemetry (INT)** embeds telemetry metadata directly into live data packets as they traverse the network. As a packet passes through each switch, the switch (typically a P4-programmable ASIC, File 14) appends metadata — its switch ID, the egress queue depth at that moment, a hop timestamp, link utilization — into an INT header stack within the packet. The receiver (or a monitoring endpoint) reads the accumulated INT stack, reconstructing the **exact path the packet took and the precise congestion state at every hop**, at microsecond granularity. This is far richer than any sampled or polled telemetry: it reveals the actual queueing experienced by real traffic.
 
 INT is the basis of **Alibaba's HPCC** congestion control (File 06), which uses the precise queue-depth information to compute exact rate adjustments. INT comes in modes — **INT-MD (metadata, full per-hop insertion)** and **INT-XD (export from each node)** — and the Intel Tofino reference implementation popularized it. INT's cost is the per-packet overhead and the need for programmable switches, but for diagnosing the transient congestion that plagues AI fabrics, its visibility is unmatched.
 
 ## Streaming Telemetry
+
+```mermaid
+flowchart LR
+  Sw["Switches / NICs<br/>(gNMI push, INT, counters)"] --> Bus["Kafka telemetry bus"]
+  Bus --> TSDB["Time-series DB<br/>(InfluxDB / Prometheus)"]
+  TSDB --> Viz["Grafana dashboards"]
+  TSDB --> AIOps["AIOps / anomaly detection / closed-loop control"]
+```
+
+*Figure 22.2 — The streaming-telemetry pipeline. Devices push state (per-port counters, buffer occupancy, congestion events) at 100 ms - 10 ms granularity, replacing legacy SNMP polling — essential for diagnosing the microbursts that throttle AI collectives.*
 
 **Streaming telemetry** replaces the request-response polling of SNMP with a **push** model: devices stream their state continuously to collectors. The standard mechanism is **gNMI Subscribe** (File 16), with modes for one-time snapshots (ONCE), periodic polling (POLL), and continuous streaming (STREAM). Devices push per-port counters, buffer occupancy, error rates, BGP state, and more at intervals that have shrunk from seconds toward **100 ms and even 10 ms**. The telemetry pipeline typically comprises:
 - A **message bus** (Kafka) to ingest the high-volume stream.

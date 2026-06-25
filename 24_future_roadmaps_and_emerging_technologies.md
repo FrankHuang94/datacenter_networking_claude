@@ -6,6 +6,24 @@ Every technology in this database is on a trajectory, and the purpose of this ch
 
 ## Electrical Interconnect Scaling Roadmap
 
+```mermaid
+timeline
+  title Datacenter networking roadmap (indicative)
+  2025 : 1.6T Ethernet (802.3dj) : 102.4T switch ASIC : LPO deployment
+  2026 : HBM4 : CXL 3.x products : 800G-ZR+ : NPO / early CPO pilots
+  2028 : 204.8T switch : CPO mainstream : C plus L plus S band
+  2030 : 3.2T Ethernet : SDM / hollow-core fiber : optical I/O on compute package
+```
+
+*Figure 24.1 — Indicative roadmap. Near-term (2025-2027) items rest on published plans and are high-confidence; medium-term depends on solving known challenges (CPO thermal/laser/yield); post-2030 items are directional and speculative.*
+
+```mermaid
+flowchart LR
+  Now["TODAY: steep staircase<br/>order-of-magnitude energy/latency jump per tier"] --> Future["FUTURE: flattened hierarchy<br/>co-packaged optics + CXL-over-optics + chiplets + optical scale-up"]
+```
+
+*Figure 24.2 — The unifying theme: flattening the interconnect hierarchy (File 01) by pushing low-energy optical interconnect outward to longer length scales, so the boundaries between chip, package, board, rack, and datacenter progressively dissolve.*
+
 The IEEE 802.3 Ethernet roadmap projects **1.6 TbE (2025–2026)**, **3.2 TbE (~2028–2030)**, and **6.4 TbE (post-2030)**, each roughly doubling on a multi-year cadence — but the pace of Ethernet speed doubling is now slower than the pace of AI compute scaling, tightening the communication bottleneck (File 15). The enabling electrical technology is the **200G-per-lane interface (200GAUI)**, driving 1.6T transceivers, where the SerDes power is severe: roughly 10–15 pJ/bit, or ~2 W per lane, ~16 W for eight lanes *before* the optics — power that makes **LPO or CPO essentially mandatory** at 1.6T and beyond (Files 13, 21).
 
 The signaling endgame is constrained: **PAM8** (3 bits/symbol) could in principle push per-lane rates higher (e.g., 600 Gbps at 200 GBaud), but it demands data converters with >6 effective bits at 200 GHz bandwidth and roughly 5× the power of PAM4 — widely judged **impractical**, so the industry is unlikely to adopt it. Higher per-lane rates will instead come from higher baud rates and, ultimately, from **optics**: the **optical-I/O integration timeline** runs through LPO (2025), NPO/CPO pilots (2026–2027), CPO mainstream (2028–2030), and eventually integrated optical fabric with the laser and photonics inside the computing package (post-2030). The electrical interconnect is approaching its limits, and the future is optical.
