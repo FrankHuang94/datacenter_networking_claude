@@ -113,6 +113,19 @@ The **coherent receiver** is far more sophisticated and far more capable. It mix
 
 ## WDM — Wavelength Division Multiplexing
 
+```mermaid
+flowchart LR
+  T1["Tx λ1"] --> MUX["WDM Mux"]
+  T2["Tx λ2"] --> MUX
+  T3["Tx λN"] --> MUX
+  MUX -->|"one fiber pair"| EDFA1["EDFA"] --> SPAN["80 km span"] --> EDFA2["EDFA"] --> DEMUX["WDM Demux"]
+  DEMUX --> R1["Rx λ1"]
+  DEMUX --> R2["Rx λ2"]
+  DEMUX --> R3["Rx λN"]
+```
+
+*Figure 9.1 — WDM carries many wavelengths on one fiber, each an independent channel, periodically re-amplified by EDFAs (which amplify all channels at once). DWDM packs ~96 channels across the C-band; C+L expansion roughly doubles that. Each amplifier adds ASE noise, degrading OSNR over the chain (File 10).*
+
 The defining technique of high-capacity optical transmission is **Wavelength Division Multiplexing (WDM)**: carrying many independent data channels on a single fiber, each on a different wavelength (color) of light, multiplexed together at the transmitter and separated at the receiver. WDM is what lets a single fiber carry tens of terabits per second.
 
 ### CWDM

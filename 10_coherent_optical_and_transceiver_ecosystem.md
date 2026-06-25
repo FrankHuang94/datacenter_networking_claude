@@ -8,6 +8,18 @@ This chapter develops coherent optical technology in depth — the DSP, the modu
 
 ## Coherent Optical Technology Deep Dive
 
+```mermaid
+flowchart LR
+  RX["Coherent front end<br/>(LO + 90 deg hybrid + balanced PDs)"] --> ADC["ADC 100+ GS/s"]
+  ADC --> CD["Chromatic dispersion comp (FFT domain)"]
+  CD --> EQ["MIMO butterfly EQ<br/>(pol demux + PMD, CMA/LMS)"]
+  EQ --> CR["Carrier freq/phase recovery"]
+  CR --> FEC["Soft-decision FEC (LDPC) + PCS"]
+  FEC --> BITS["recovered bits"]
+```
+
+*Figure 10.1 — The coherent receive DSP pipeline. Recovering the full optical field lets the DSP digitally undo dispersion and PMD, demodulate high-order QAM, and apply ~11 dB-gain soft-decision FEC — the engine of all long-haul, DCI, and pluggable-ZR transmission. Its computational load drives coherent transceiver power and process node.*
+
 ### The DSP at the Heart of Coherent
 
 A coherent transceiver is, fundamentally, a high-speed mixed-signal system wrapped around a powerful **DSP (Digital Signal Processor)**. On the receive side, the coherent front end (90° hybrid, balanced photodetectors, File 09) delivers four electrical signals (I and Q for each polarization) to **ADCs sampling at 100+ gigasamples per second**, and the DSP then performs an extraordinary sequence of operations to recover the data:

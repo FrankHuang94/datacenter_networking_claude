@@ -47,6 +47,18 @@ There are also **half-width variants** — HDR100, NDR100 — that use 2 lanes i
 
 ## InfiniBand Architecture Deep Dive
 
+```mermaid
+flowchart TB
+  SM["Subnet Manager (OpenSM)<br/>assigns LIDs, computes routing"] -.->|"manages"| SW1
+  SW1["IB Switch"] --- SW2["IB Switch"]
+  SW1 --- HCA1["Host CA (server)"]
+  SW1 --- HCA2["Host CA (server)"]
+  SW2 --- HCA3["Host CA (server)"]
+  SW2 --- HCA4["Host CA (server)"]
+```
+
+*Figure 7.2 — InfiniBand uses centralized control: a Subnet Manager discovers the fabric, assigns 16-bit LIDs, and computes deadlock-free forwarding tables — contrasting with Ethernet's distributed, self-configuring BGP/ECMP control plane. Credit-based flow control on every link makes the fabric lossless by design.*
+
 ### The Link Layer: Credit-Based Flow Control
 
 InfiniBand's link layer is built around **Virtual Lanes (VLs)** and **credit-based flow control**. A physical link is divided into up to **16 virtual lanes (VL0–VL15)**, each with its own independent buffer and credit pool (VL15 is reserved for subnet management traffic). Credit-based flow control works as follows: the receiver advertises to the sender how much buffer space it has available, in credits; the sender may transmit only as much data as it has credits for; as the receiver drains its buffer and frees space, it returns credits. Because the sender never transmits more than the receiver can buffer, **packets are never dropped due to congestion** — losslessness is guaranteed at the link level, proactively.
@@ -92,6 +104,22 @@ This centralized model is both a strength and a weakness. It enables globally op
 InfiniBand switches forward based on the destination LID using a **Linear Forwarding Table** computed by the SM. The SM runs a **routing algorithm** appropriate to the topology — **MINHOP** for general topologies, **up/down routing** for fat-trees (packets go up to a common ancestor switch, then down, guaranteeing deadlock freedom), or **DFSSSP** and others for specific structures. NVIDIA's Quantum switches support **Adaptive Routing (AR)**, in which a switch can dynamically reroute packets onto less-congested paths rather than rigidly following the precomputed table, improving load balance for irregular and bursty traffic — a significant advantage for AI workloads whose collective patterns can otherwise create hot spots. Adaptive routing must be done carefully to preserve the lossless, ordered semantics that RDMA relies on.
 
 ## NVIDIA AI Fabric Products
+
+```mermaid
+flowchart TB
+  subgraph DGX["DGX H100 node — scale-up (NVLink 4, 900 GB/s per GPU)"]
+    NS["NVSwitch 3rd Gen (all-to-all mesh)"]
+    G0["GPU0"] --- NS
+    G1["GPU1"] --- NS
+    G2["GPU2"] --- NS
+    G3["GPU3"] --- NS
+  end
+  NS --- CX["4x ConnectX-7 NICs"]
+  CX -->|"NDR 400G InfiniBand (scale-out)"| Q2["Quantum-2 switch<br/>(SHARP in-network reduce)"]
+  Q2 --- DGX2["other DGX nodes"]
+```
+
+*Figure 7.1 — NVIDIA's two-tier AI fabric: NVLink/NVSwitch provides the ultra-high-bandwidth scale-up mesh within a node, while InfiniBand (ConnectX-7 NICs into Quantum-2 switches, with SHARP doing in-network gradient reduction) provides the scale-out fabric between nodes (File 15).*
 
 NVIDIA's post-Mellanox networking portfolio is a vertically integrated AI fabric, co-designed with its GPUs and software.
 

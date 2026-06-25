@@ -117,6 +117,66 @@ Ethernet links negotiate their configuration automatically. **Autonegotiation (A
 
 ## Datacenter Network Topology
 
+**Two-tier leaf-spine (Clos):**
+
+```mermaid
+flowchart TB
+  SP1["Spine 1"]
+  SP2["Spine 2"]
+  SP3["Spine 3"]
+  L1["Leaf 1"] --- SP1
+  L1 --- SP2
+  L1 --- SP3
+  L2["Leaf 2"] --- SP1
+  L2 --- SP2
+  L2 --- SP3
+  L3["Leaf 3"] --- SP1
+  L3 --- SP2
+  L3 --- SP3
+  L1 --- s1["servers / GPUs"]
+  L2 --- s2["servers / GPUs"]
+  L3 --- s3["servers / GPUs"]
+```
+
+*Figure 6.1 — Leaf-spine Clos: every leaf connects to every spine, so any-to-any traffic takes leaf-spine-leaf with as many equal-cost paths as there are spines (ECMP). A 1:1 (non-blocking) oversubscription is used for AI fabrics.*
+
+**Three-tier Clos (super-spine) for hyperscale:**
+
+```mermaid
+flowchart TB
+  SS1["Super-spine"]
+  SS2["Super-spine"]
+  SS1 --- A1["Spine (Pod 1)"]
+  SS1 --- B1["Spine (Pod 2)"]
+  SS2 --- A1
+  SS2 --- B1
+  A1 --- AL1["Leaf"]
+  A1 --- AL2["Leaf"]
+  B1 --- BL1["Leaf"]
+  B1 --- BL2["Leaf"]
+```
+
+*Figure 6.2 — A super-spine tier stitches pods of leaf-spine fabric together, scaling to hundreds of thousands of endpoints with ECMP at each tier.*
+
+**Alternative topologies — 2D torus (HPC / TPU style):**
+
+```
+        +----+   +----+   +----+
+        | N00|---| N01|---| N02|--(wrap)
+        +----+   +----+   +----+
+          |        |        |
+        +----+   +----+   +----+
+        | N10|---| N11|---| N12|--(wrap)
+        +----+   +----+   +----+
+          |        |        |
+        +----+   +----+   +----+
+        | N20|---| N21|---| N22|--(wrap)
+        +----+   +----+   +----+
+       (wrap)    (wrap)   (wrap)
+```
+
+*Figure 6.3 — A torus connects each node only to nearest neighbors with wraparound links — low hop count for neighbor traffic, poor for all-to-all. Google TPU pods use a 3D torus over optical links with optical circuit switching (Files 11, 15).*
+
 The choice of topology determines a datacenter network's scalability, bisection bandwidth, latency, cost, and fault tolerance. Ethernet supports several, each suited to different workloads.
 
 ### Fat-Tree / Clos — The Dominant Topology
@@ -144,6 +204,21 @@ AI clusters use **rail-optimized** designs to minimize the hops in collective co
 The most advanced topological innovation is **optical circuit switching (OCS)**, pioneered at scale by **Google** (its Palomar and Jupiter-integrated OCS, described in the SIGCOMM 2022 "Jupiter Evolving" paper). An OCS uses MEMS mirrors (or other optical-switching technology) to physically reconfigure the optical connections between switches, changing the network topology on the fly — typically in around 10 milliseconds. This lets the fabric adapt its topology to the traffic: dedicating direct optical circuits to large "elephant" flows, or reconfiguring to provide non-blocking connectivity for a particular collective communication pattern. For AI training, where different parallelism strategies and different collective operations stress the network differently, the ability to reconfigure topology is a powerful tool, and Google has used OCS to improve the efficiency and incremental upgradability of its Jupiter fabric. OCS blurs the line between the packet-switched and circuit-switched worlds, and it is a major theme of the AI-networking future (Files 11, 15, 24).
 
 ## Datacenter Ethernet Congestion Management
+
+```mermaid
+sequenceDiagram
+  participant Snd as Sender RNIC
+  participant Sw as Switch
+  participant Rcv as Receiver RNIC
+  Snd->>Sw: RDMA packets
+  Note over Sw: queue passes ECN marking threshold (~20-30%)
+  Sw->>Rcv: packet marked ECN Congestion-Experienced
+  Rcv->>Snd: CNP (congestion notification packet)
+  Snd->>Snd: DCQCN multiplicative rate decrease
+  Note over Sw: if buffer near full (~80%) → PFC PAUSE upstream (last resort)
+```
+
+*Figure 6.4 — The RoCEv2 congestion-control loop. ECN/DCQCN is the primary, graceful control that keeps queues short; PFC is the last-resort safety net whose backpressure can spread congestion and even deadlock if mis-designed (Files 02, 17).*
 
 The hardest problem in datacenter Ethernet — and the one that determines whether Ethernet can rival InfiniBand for AI — is **congestion management for lossless RDMA**. RoCEv2 (File 08) requires a lossless fabric, because a dropped packet forces an expensive RDMA retransmission. Achieving losslessness on a best-effort technology like Ethernet requires a careful stack of mechanisms.
 

@@ -6,6 +6,20 @@ Remote Direct Memory Access (RDMA) is the technology that makes high-performance
 
 ## RDMA Fundamentals
 
+```mermaid
+flowchart LR
+  subgraph S["Sender host"]
+    AppS["Application (user space)"] -->|"post Work Request (kernel bypass)"| RN1["RDMA NIC"]
+    MemS["App memory (registered)"] -.->|"DMA, zero-copy"| RN1
+  end
+  RN1 ==>|"RDMA Write over fabric"| RN2
+  subgraph R["Receiver host"]
+    RN2["RDMA NIC"] -.->|"DMA direct to memory"| MemR["App memory (no CPU, no copy)"]
+  end
+```
+
+*Figure 8.1 — RDMA's three superpowers: kernel bypass (app talks straight to the NIC), zero-copy (NIC DMAs directly to/from registered app memory), and one-sided transfer (the remote CPU is never involved). This yields sub-microsecond latency and near-zero CPU overhead — and is why a congestion drop, which forces retransmission, is so costly (File 17).*
+
 The classic networking stack — application, sockets, TCP/IP, kernel, NIC — imposes three costs that RDMA eliminates. First, **CPU involvement**: every packet traverses the kernel, consuming CPU cycles for protocol processing, interrupt handling, and context switches. Second, **memory copies**: data is copied from application buffers to kernel socket buffers to NIC buffers (and the reverse on receive), consuming memory bandwidth. Third, **latency**: the journey through the kernel stack adds microseconds. For a web server these costs are tolerable; for a 10,000-GPU training job exchanging gradients every few milliseconds, they are fatal.
 
 RDMA eliminates all three through three mechanisms:
@@ -44,6 +58,16 @@ Programming RDMA directly involves a specific sequence of operations:
 Writing directly to verbs is powerful but laborious, so most applications use higher-level abstractions. **libfabric (the OpenFabrics Interfaces, OFI)** is a portable abstraction layer over verbs and other RDMA/networking providers, presenting a consistent API that can target InfiniBand verbs, RoCE, iWARP, shared memory, or vendor-specific transports — insulating applications from the underlying fabric. **UCX (Unified Communication X)** is another widely used abstraction (below).
 
 ## MPI and Collective Communication over RDMA
+
+```mermaid
+flowchart LR
+  G0["GPU0"] -->|"chunk"| G1["GPU1"]
+  G1 -->|"chunk"| G2["GPU2"]
+  G2 -->|"chunk"| G3["GPU3"]
+  G3 -->|"chunk"| G0
+```
+
+*Figure 8.2 — Ring AllReduce: each GPU passes a reduced chunk to its neighbor around the ring; after 2(N-1) steps every GPU holds the full reduced result. Bandwidth-optimal for large tensors. In-network reduction (SHARP/NVLS, File 15) instead reduces in the switch, halving the data movement and removing the O(N) ring latency.*
 
 The dominant programming model for HPC and much of AI distributed computing is **MPI (Message Passing Interface)**, implemented by **OpenMPI**, **MVAPICH2**, and others. MPI runs over RDMA through transport layers such as **UCX (Unified Communication X)**, which automatically selects the best available transport — InfiniBand verbs, RoCEv2, shared memory for intra-node, or others — based on the topology, and which is used not only by OpenMPI but by distributed frameworks including Spark and TensorFlow. UCX abstracts the messy details of transport selection and optimization, presenting a clean point-to-point and one-sided communication API.
 
