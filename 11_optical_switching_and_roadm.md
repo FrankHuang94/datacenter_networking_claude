@@ -6,6 +6,16 @@ Once data is on a wavelength of light traveling through fiber, it is enormously 
 
 ## ROADM — Reconfigurable Optical Add-Drop Multiplexer
 
+```mermaid
+flowchart TB
+  W["Degree: West fiber"] --- CORE["WSS core (LCoS)<br/>per-wavelength routing"]
+  E["Degree: East fiber"] --- CORE
+  N["Degree: North fiber"] --- CORE
+  CORE --- AD["Colorless/Directionless<br/>Add-Drop (local transponders)"]
+```
+
+*Figure 11.2 — A multi-degree CDC-ROADM. Each wavelength can pass through to any degree, or be dropped to/added from local transponders, all in the optical domain via wavelength-selective switches. This wavelength-granular, software-driven routing is what makes the optical transport network agile.*
+
 The **ROADM** is the workhorse of the modern optical transport network. Its job is to take the dozens of wavelengths arriving on incoming fibers and, for each wavelength, decide whether to **pass it through** (continue toward another destination), **drop it** (deliver it to a local transponder/receiver), or **add** a locally generated wavelength to an outgoing fiber — all in the optical domain, without converting the pass-through wavelengths to electrical. This wavelength-granular, remotely reconfigurable routing is what makes a modern optical network agile: operators can provision and reroute wavelengths from a management console, without sending technicians to patch fibers.
 
 ### Evolution and Architecture
@@ -30,6 +40,17 @@ The WSS market is a near-duopoly: **Lumentum** holds the largest share (~45–50
 An **OXC (Optical Cross-Connect)** performs all-optical switching at the granularity of whole fibers or fiber-spatial-paths (rather than individual wavelengths). The dominant technology for large OXCs is **3D MEMS**: an array of microscopic mirrors that can tilt in two axes to steer a beam of light from any input fiber to any output fiber, building switch matrices as large as **1000×1000 ports** or more. OXCs are used in submarine cable landing stations (to interconnect cable systems and terrestrial backhaul) and in large optical cores. **Calient Technologies** is a leading vendor of 3D-MEMS OXCs (its S-series). OXCs are slow to reconfigure (milliseconds, limited by mirror movement) but offer massive, protocol-transparent, bit-rate-transparent all-optical switching at very low power per bit — switching light without ever looking at it.
 
 ## OCS — Optical Circuit Switching in the Datacenter
+
+```mermaid
+flowchart TB
+  B1["Aggregation block 1"] --- OCS["MEMS Optical Circuit Switch<br/>(reconfigurable in ~ms)"]
+  B2["Aggregation block 2"] --- OCS
+  B3["Aggregation block 3"] --- OCS
+  B4["Aggregation block 4"] --- OCS
+  OCS -. "topology re-wired per traffic/collective pattern" .- OCS
+```
+
+*Figure 11.1 — Optical circuit switching (Google's Apollo/Palomar) interposes a reconfigurable MEMS optical switch between aggregation blocks, so the fabric topology can be re-wired in milliseconds to match the traffic — or, for AI, the collective-communication pattern of a job (Files 06, 15). It also enables incremental, heterogeneous fabric upgrades.*
 
 The most striking recent application of optical switching is **inside the datacenter**, where **Google** pioneered **Optical Circuit Switching (OCS)** at production scale. Google's **Apollo/Palomar** OCS systems, described in the SIGCOMM 2022 paper **"Jupiter Evolving,"** use **MEMS-based optical switches** to dynamically reconfigure the topology of the datacenter fabric. Rather than a fixed Clos with electronic spine switches, Google interposes OCS between aggregation blocks, so the logical topology can be reconfigured (in roughly milliseconds) to match traffic patterns and to allow incremental, heterogeneous upgrades of the fabric.
 

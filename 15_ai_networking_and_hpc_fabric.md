@@ -6,6 +6,16 @@ In distributed AI training, the network is not an accessory to the computation �
 
 ## AI Training Networking Requirements
 
+```mermaid
+flowchart TB
+  TP["Tensor parallel<br/>frequent, small, latency-sensitive<br/>→ map INSIDE NVLink scale-up domain"]
+  PP["Pipeline parallel<br/>activation hand-off between stages<br/>→ point-to-point, minimize hops"]
+  DP["Data parallel<br/>gradient AllReduce per step<br/>→ across scale-out fabric (SHARP/NVLS)"]
+  EP["Expert parallel (MoE)<br/>token AllToAll<br/>→ highest all-to-all bandwidth"]
+```
+
+*Figure 15.2 — Each parallelism dimension has a distinct communication pattern and is mapped onto the part of the network best suited to it. Getting this mapping right — co-designing parallelism, collective algorithm, and topology — is the heart of large-scale training systems engineering.*
+
 ### Communication Patterns in Distributed Training
 
 Distributed deep-learning training parallelizes the work across many accelerators, and each form of parallelism imposes a distinct communication pattern:
@@ -31,6 +41,24 @@ The key collectives and their traffic costs:
 A **roofline** analysis frames whether a training job is compute-bound or communication-bound: the arithmetic intensity (FLOPs per byte communicated) of the workload, compared to the ratio of the accelerator's FLOPS to its interconnect bandwidth, determines which resource binds. For example, synchronizing a 70B-parameter model's gradients across 8 GPUs at 900 GB/s NVLink takes on the order of tens of milliseconds — a meaningful fraction of the ~100 ms compute time per step — so even at NVLink bandwidth, communication is a first-order term, and at the lower bandwidths of the scale-out fabric, it dominates without careful overlap and in-network reduction.
 
 ## Scale-Up versus Scale-Out
+
+```mermaid
+flowchart TB
+  subgraph D1["Scale-up domain (NVLink/NVSwitch, 900 GB/s - 1.8 TB/s per GPU)"]
+    a0["GPU"] --- nsw1["NVSwitch"]
+    a1["GPU"] --- nsw1
+    a2["GPU"] --- nsw1
+    a3["GPU"] --- nsw1
+  end
+  subgraph D2["Scale-up domain"]
+    b0["GPU"] --- nsw2["NVSwitch"]
+    b1["GPU"] --- nsw2
+  end
+  nsw1 ---|"Scale-out: InfiniBand / RoCE, 400-800 Gb/s per GPU"| SPINE["Clos spine"]
+  nsw2 --- SPINE
+```
+
+*Figure 15.1 — The two-tier AI fabric. Tensor parallelism (frequent, latency-sensitive collectives) is mapped inside the high-bandwidth scale-up domain (NVLink); data and pipeline parallelism run across the scale-out fabric (InfiniBand/RoCE). Enlarging the scale-up domain (8 GPUs in DGX H100, 72 in GB200 NVL72) lets bigger models be served at NVLink bandwidth.*
 
 A foundational concept in AI networking is the distinction between **scale-up** and **scale-out** fabrics:
 

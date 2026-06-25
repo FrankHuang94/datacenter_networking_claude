@@ -6,6 +6,17 @@ At the center of every datacenter switch is a single chip — the **switch ASIC*
 
 ## Switch ASIC Architecture Fundamentals
 
+```mermaid
+flowchart LR
+  IN["Ingress ports (SerDes)"] --> P["Parser<br/>(extract headers)"]
+  P --> MA["Match-Action<br/>TCAM (ACL/LPM) + SRAM (exact-match)"]
+  MA --> MOD["Modifier<br/>(TTL, MAC rewrite, VXLAN encap/decap)"]
+  MOD --> TM["Traffic Manager<br/>(VOQ, 8 priority queues, buffers)"]
+  TM --> DP["Deparser"] --> OUT["Egress ports (SerDes)"]
+```
+
+*Figure 14.1 — The switch ASIC packet pipeline. TCAM provides O(1) wildcard/longest-prefix lookups (at high power cost); the traffic manager's VOQ and buffering set the queuing latency that dominates the tail under load (File 17). The SerDes (ingress/egress) consume most of the die area and power — the term co-packaged optics attacks (File 13).*
+
 ### Switching Fabric Architecture
 
 The core of a switch ASIC is its **switching fabric** — the internal structure that moves packets from ingress ports to egress ports. Several architectures exist, distinguished by where packets are buffered:

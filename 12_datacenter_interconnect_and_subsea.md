@@ -6,6 +6,16 @@ A single datacenter is no longer the unit of the cloud. Hyperscalers operate **r
 
 ## The DCI Reach Continuum
 
+```mermaid
+flowchart LR
+  C["Campus<br/>sub-10 km<br/>gray DR4/FR4"] --> M["Metro<br/>10-80 km<br/>400G-ZR single span"]
+  M --> R["Regional<br/>80-500 km<br/>ZR+ amplified"]
+  R --> L["Continental<br/>500-3000 km<br/>integrated coherent + ROADM"]
+  L --> S["Subsea<br/>1000s km<br/>repeatered DWDM"]
+```
+
+*Figure 12.1 — The DCI reach continuum and the technology crossovers along it: direct-detect grays, single-span ZR, amplified ZR+, integrated long-haul coherent, and submarine. Pluggable coherent steadily encroaches on the longer tiers as DSP cost falls (File 10).*
+
 DCI applications span a wide range of distances, each best served by different technology:
 
 - **Campus DCI (under ~10 km)**: connecting buildings within a campus, typically over operator-owned **dark fiber**. At these distances, direct-detect 400G/800G pluggables (DR4, FR4) or short-reach coherent suffice; no amplification is needed. This is the cheapest and simplest tier, dominated by gray (single-wavelength) or low-channel-count optics plugged directly into routers/switches.
@@ -39,6 +49,18 @@ The metro and long-haul DWDM systems that carry DCI and backbone traffic are whe
 These systems represent the high end of optical engineering, squeezing tens of terabits per second out of each fiber pair across thousands of kilometers, and they are the backbone over which the hyperscalers' inter-region traffic and the carriers' core traffic flow.
 
 ## Submarine Cable Systems
+
+```mermaid
+flowchart LR
+  LS1["Landing station<br/>+ Power Feed Equipment"] --> R1["Repeater (EDFA)"]
+  R1 -->|"40-80 km"| R2["Repeater (EDFA)"]
+  R2 -->|"40-80 km"| R3["Repeater (EDFA)"]
+  R3 --> BU["Branching Unit"]
+  BU --> LS2["Landing station A"]
+  BU --> LS3["Landing station B"]
+```
+
+*Figure 12.2 — A submarine cable system: shore-based landing stations power the wet plant (high-voltage DC over the cable's copper conductor), EDFA repeaters re-amplify every 40-80 km, and branching units split toward multiple landings. Hyperscalers now build and own entire private cables (Google Dunant/Grace Hopper, Meta 2Africa).*
 
 The most extraordinary optical systems are the **submarine cables** that cross the oceans, carrying the overwhelming majority of intercontinental data traffic. A submarine cable system is a feat of engineering operating in one of the harshest environments on Earth — the deep ocean floor — for a 25-year design life.
 

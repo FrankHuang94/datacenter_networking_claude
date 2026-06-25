@@ -6,6 +6,21 @@ Every technology in this database is ultimately constrained by power. Nowhere is
 
 ## The Bandwidth-Power Crisis in Datacenter Optics
 
+```mermaid
+flowchart TB
+  subgraph PL["Pluggable today — total ~6-9 pJ/bit"]
+    A1["Switch ASIC"] -->|"long lossy SerDes (inches)"| FP["Front-panel module + DSP"] --> F1["fiber"]
+  end
+  subgraph LP["LPO — remove module DSP"]
+    A2["Switch ASIC (does the EQ)"] -->|"SerDes"| FP2["Linear module, no DSP"] --> F2["fiber"]
+  end
+  subgraph CP["CPO — total ~1.5-2 pJ/bit"]
+    A3["Switch ASIC"] -->|"mm, on-package (UCIe-like)"| OE["Co-packaged optical engine"] --> F3["fiber"]
+  end
+```
+
+*Figure 13.1 — The three approaches to the faceplate power wall. CPO eliminates the long, lossy electrical SerDes channel to the front panel (the 5-10 pJ/bit term), cutting total energy ~4-5x; LPO is the near-term win that removes the module DSP. The trade-off is reach, serviceability, and thermal/laser challenges.*
+
 Consider the trajectory of switch ASIC bandwidth. Broadcom's Tomahawk family illustrates it: **Tomahawk 4 at 12.8 Tbps**, **Tomahawk 5 at 51.2 Tbps**, with a roadmap toward **102.4 Tbps** and beyond. Each doubling of switch bandwidth must be carried off the chip and out to the network, and at the front panel that means more — and faster — optical transceivers. A 51.2 Tbps switch front-panel might host 64 ports of 800G or 128 ports of 400G; the next generation doubles that again. Two power problems compound:
 
 First, the **transceiver power** itself. A pluggable optical module consumes on the order of 5–20 watts (a 400G QSFP-DD around 10–14 W, an 800G module more). Multiply by 256 to 512 ports on a high-end switch, and the transceivers alone can draw **one to several kilowatts** — often exceeding the power of the switch ASIC itself. The transceivers, not the switching silicon, become the dominant power term.
