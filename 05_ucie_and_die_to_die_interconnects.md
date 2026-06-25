@@ -8,6 +8,18 @@ This chapter covers the chiplet revolution and its interconnects: the rationale 
 
 ## Chiplet Architecture and the Need for Die-to-Die Interconnects
 
+```mermaid
+flowchart TB
+  subgraph PKG["Accelerator package on silicon interposer (CoWoS)"]
+    HBM1["HBM stack<br/>(8-12 DRAM dies + base die)"] ---|"1024-bit, ~1 pJ/bit"| GPU["GPU compute die(s)"]
+    GPU ---|"UCIe / Infinity Fabric<br/>die-to-die"| IOD["I/O die"]
+    GPU --- HBM2["HBM stack"]
+  end
+  IOD -->|"PCIe / CXL / NVLink off-package"| World["Rest of system"]
+```
+
+*Figure 5.1 — A modern accelerator is itself a small network of chiplets: compute die(s), I/O die, and HBM stacks co-packaged on an interposer and joined by die-to-die links (UCIe, proprietary fabrics, the 1024-bit HBM interface) at sub-nanosecond latency and sub-picojoule energy.*
+
 ### Why Chiplets: The End of Monolithic Scaling
 
 For decades, the economically optimal way to build a complex chip was to integrate everything onto a single monolithic die at the most advanced process node available. Several converging pressures broke this model:

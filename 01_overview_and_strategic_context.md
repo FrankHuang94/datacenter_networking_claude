@@ -52,6 +52,18 @@ The hyperscalers each pursue this at planetary scale but with distinct architect
 
 ## The Interconnect Hierarchy
 
+```mermaid
+flowchart LR
+  A["Die-to-die<br/>UCIe, HBM<br/>sub-ns, sub-pJ/bit"] --> B["Chip-to-chip<br/>NVLink, UALink<br/>10-100 ns"]
+  B --> C["Board<br/>PCIe, CXL<br/>~100 ns, 3-5 pJ/bit"]
+  C --> D["Rack<br/>Ethernet, InfiniBand<br/>0.5-5 us"]
+  D --> E["Datacenter<br/>Optical SR/DR/FR<br/>5-20 us"]
+  E --> F["Metro / DCI<br/>400G-ZR coherent<br/>tens of us"]
+  F --> G["Long-haul / Subsea<br/>Coherent DWDM<br/>ms to 100s ms"]
+```
+
+*Figure 1.1 — The interconnect hierarchy from die to ocean. Energy-per-bit and latency rise by roughly an order of magnitude at each step outward; the field's trajectory (File 24) is to flatten this staircase.*
+
 It is worth laying out the full hierarchy explicitly, because the entire structure of this database follows it from the inside out:
 
 | Tier | Scale | Dominant technologies | Energy/bit | Latency |

@@ -43,6 +43,15 @@ CXL has evolved through several generations, each adding major capability:
 
 ## The Three CXL Sub-Protocols
 
+```mermaid
+flowchart LR
+  Host["Host CPU + caches"] -->|"CXL.io — discovery, config, DMA (PCIe semantics)"| Dev["CXL Device"]
+  Host -->|"CXL.cache — device coherently caches host memory"| Dev
+  Dev -->|"CXL.mem — host accesses device-attached memory"| Host
+```
+
+*Figure 4.1 — The three CXL sub-protocols multiplexed over one PCIe physical link. CXL.io (mandatory, PCIe-compatible) carries control; CXL.cache lets a device cache host memory; CXL.mem lets the host reach device memory. Device types use different subsets: Type 1 = io+cache, Type 2 = all three, Type 3 = io+mem.*
+
 CXL multiplexes three distinct sub-protocols over a single link, dynamically interleaving them: **CXL.io**, **CXL.cache**, and **CXL.mem**. A given device uses some subset of these depending on its type. The protocols are multiplexed on the wire by the CXL flex-bus logical layer, which interleaves CXL.io traffic (less latency-sensitive) with CXL.cache and CXL.mem traffic (highly latency-sensitive) using a fixed-format, low-latency framing.
 
 ### CXL.io — The I/O and Control Path
@@ -86,6 +95,17 @@ CXL defines three device types based on which sub-protocols they implement, each
 **Type 3 — Memory expander, no compute, no caching (CXL.io + CXL.mem).** A Type 3 device is pure memory: DRAM or persistent memory that adds capacity (and bandwidth) to the host, with no compute and no caching of host memory. The host accesses it via CXL.mem; CXL.io handles enumeration and management. Type 3 is the device class driving the memory-expansion and memory-pooling use cases, and it is where the memory vendors are concentrating their products: **Samsung's CMM-D (CXL Memory Module-DRAM), SK Hynix's CMM-H, and Micron's CXL memory expanders** are all Type 3 devices, as are persistent-memory variants and computational-memory switches. Type 3 is the simplest device class to build (no coherence engine to cache host memory) and the most immediately deployable, which is why it leads CXL's commercial adoption.
 
 ## CXL Memory Pooling and Switching (CXL 2.0+)
+
+```mermaid
+flowchart TB
+  H1["Host A"] --> SWX["CXL Switch<br/>(Fabric Manager assigns LDs)"]
+  H2["Host B"] --> SWX
+  H3["Host C"] --> SWX
+  SWX --> M1["Type 3 MLD device<br/>LD0 to A, LD1 to B"]
+  SWX --> M2["Type 3 MLD device<br/>LD0 to C, LD1 to A"]
+```
+
+*Figure 4.2 — CXL 2.0 memory pooling. A shared pool of Type 3 memory is carved into Logical Devices (LDs) and dynamically assigned to hosts by the Fabric Manager, attacking the stranded-memory problem. CXL 3.0 extends this to multi-level fabrics and device-to-device peer access.*
 
 CXL 1.1 supported only a direct point-to-point link between a host and a device. **CXL 2.0 introduced switching**, and with it the transformative capability of **memory pooling**.
 

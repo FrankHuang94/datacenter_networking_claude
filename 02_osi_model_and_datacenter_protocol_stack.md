@@ -2,6 +2,18 @@
 
 ## The OSI Model as a Map of the Datacenter Stack
 
+```mermaid
+flowchart TB
+  L7["L7 Application — HTTP, gRPC, NFS, NVMe-oF, gNMI/OpenConfig"]
+  L4["L4 Transport — TCP, UDP carrying RoCEv2, QUIC, DCQCN/HPCC"]
+  L3["L3 Network — IPv4/IPv6, BGP, ECMP, VXLAN/GENEVE overlay"]
+  L2["L2 Data Link — Ethernet frame, 802.1Q VLAN, PFC, LACP, LLDP"]
+  L1["L1 Physical — NRZ/PAM4, RS-FEC, DAC/AEC/Optical (SR/DR/FR/LR/ZR)"]
+  L7 --> L4 --> L3 --> L2 --> L1
+```
+
+*Figure 2.1 — The OSI layers populated with their datacenter implementations. The chapters that follow map each technology onto this stack.*
+
 The seven-layer Open Systems Interconnection (OSI) reference model, formalized by ISO in 1984, is an idealization that no real network implements literally, yet it remains the indispensable shared vocabulary of networking. Its enduring value in the datacenter is as a map: it tells us at which layer a given technology operates, which layers it depends on, and which layers depend on it. When an AI training engineer complains that "the fabric is dropping packets," when a data-center architect debates "Layer 2 versus Layer 3 to the host," or when an optical engineer specifies a "Layer 1 retimer," they are all locating their concern on this map.
 
 This chapter walks the model from the bottom up, populating each layer with the specific protocols, encodings, and hardware that constitute a modern datacenter network. The crucial insight — developed at the end of the chapter — is that in a high-performance AI fabric, the layers do not operate independently. The physical-layer forward error correction, the link-layer flow control, the network-layer load balancing, and the transport-layer congestion control are co-designed and tightly coupled. A change at one layer ripples through all the others.
@@ -138,6 +150,14 @@ Consider what happens during a single AllReduce on a RoCEv2 Ethernet fabric:
 The art of building these fabrics, explored throughout this database, lies in tuning all four layers together: FEC strength versus latency, PFC thresholds versus ECN marking thresholds, buffer sizing versus burst absorption, ECMP entropy versus flow collisions, and DCQCN parameters versus message-size distribution. Get the coupling wrong and the fabric either drops RDMA packets (catastrophic for throughput) or spreads PFC backpressure until the whole fabric stalls (catastrophic for the collective). Get it right and the fabric delivers near-wire-rate, near-deterministic collective performance across tens of thousands of GPUs. This is why AI networking is a systems problem, not a layer-by-layer problem.
 
 ## Overlay Networks: VXLAN, GENEVE, and GRE
+
+```mermaid
+flowchart LR
+  PL["RDMA payload"] --> BTH["IB BTH"] --> U1["UDP 4791"] --> IIP["Inner IP"] --> IE["Inner Eth"]
+  IE --> VX["VXLAN VNI"] --> U2["Outer UDP<br/>(src port = entropy)"] --> OIP["Outer IP"] --> OE["Outer Eth + FEC"]
+```
+
+*Figure 2.2 — Encapsulation nesting for an RDMA write carried over a VXLAN overlay. The underlay switches route on the outer headers (right); the entropy in the outer UDP source port lets ECMP spread tunneled flows. Hardware offload and jumbo frames are required to process this depth at line rate.*
 
 The final piece of the protocol stack is the overlay — the virtual networks built on top of the physical (underlay) fabric to provide tenant isolation, mobility, and addressing independence.
 

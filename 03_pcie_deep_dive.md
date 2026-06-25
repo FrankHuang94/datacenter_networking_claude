@@ -66,6 +66,17 @@ PCIe 6.0 also introduced the **L0p** low-power active state (discussed below), w
 
 ## The PCIe Protocol Stack: Three Layers
 
+```mermaid
+flowchart TB
+  TLP["Transaction Layer<br/>TLPs: MRd / MWr / Cpl, Traffic Classes, Virtual Channels, credit-based flow control"]
+  DLL["Data Link Layer<br/>sequence numbers, 32-bit LCRC, Ack/Nak retry buffer, FC-DLLPs"]
+  PHY["Physical Layer<br/>LTSSM, scrambling, 8b/10b - 128b/130b - FLIT+FEC, differential SerDes"]
+  TLP --> DLL --> PHY
+  PHY --> DLL --> TLP
+```
+
+*Figure 3.1 — The three-layer PCIe protocol stack. Transactions flow down at the sender and up at the receiver; the data-link layer provides reliable delivery (retry) and lossless flow control (credits) that CXL and InfiniBand echo at larger scales.*
+
 PCIe's protocol is organized into three layers, conceptually analogous to (but distinct from) the OSI layers: the **Transaction Layer**, the **Data Link Layer**, and the **Physical Layer**. Data flows down the stack at the transmitter (transaction → data link → physical) and up the stack at the receiver. Understanding these layers is essential because CXL (File 04) reuses the PCIe physical and (for CXL.io) transaction layers while adding its own coherence protocols, and because the layering explains where latency, reliability, and flow control come from.
 
 ### The Transaction Layer
@@ -154,6 +165,19 @@ Deeper still, **L2** is a near-off state with main power removed (only auxiliary
 Storage devices add their own states: **DevSleep** (a low-power state for SATA/NVMe drives) and various NVMe-defined power states integrate with PCIe power management to minimize the standby power of the vast NVMe fleets in hyperscale storage.
 
 ## PCIe in the Datacenter Context
+
+```mermaid
+flowchart TB
+  RC["Root Complex (CPU)"] --> GPU["GPU (x16)"]
+  RC --> NIC["NIC / DPU (x16)"]
+  RC --> SW["PCIe Switch (fan-out)"]
+  SW --> NVMe1["NVMe SSD (x4)"]
+  SW --> NVMe2["NVMe SSD (x4)"]
+  SW --> Acc["Accelerator (x8)"]
+  GPU -. "NVLink, not PCIe (900 GB/s)" .- GPU2["peer GPU"]
+```
+
+*Figure 3.2 — PCIe is a strict tree rooted at the CPU's root complex. Note that GPU-to-GPU traffic uses NVLink (dashed), not PCIe — PCIe is the CPU-to-GPU staging and GPU-to-NIC path, not the GPU-to-GPU training path (File 07).*
 
 ### GPU Connectivity and the PCIe Bandwidth Question
 
