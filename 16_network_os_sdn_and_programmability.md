@@ -34,6 +34,8 @@ The open-NOS movement decouples the network software from the hardware, letting 
 
 The open-NOS movement is one of the clearest expressions of the broader disaggregation trend: the network, like the server before it, is becoming a commodity-hardware-plus-open-software platform.
 
+Two developments through 2025–2026 mark how far SONiC in particular has travelled from its origins as a hyperscaler-internal project. First, **AI-fabric transport has arrived in open NOSes**: **Ultra Ethernet (UEC 1.0)** support — the UET transport, its congestion control, and its packet-spraying behavior (Files 06, 17, 24) — is being implemented in commercial and open network operating systems, which is the mechanism by which the UEC's specification actually becomes a multi-vendor fabric rather than a document. Second, **incumbent vendors now ship SONiC first on their most strategic new platforms**: Cisco's **8223** scale-across system launched with SONiC support and added IOS XR afterwards (Files 14, 24). A decade ago the open NOS was what hyperscalers ran instead of buying the vendor's software; today it is what the vendor ships to reach the hyperscaler at all. The disaggregation argument has been won at the top of the market, whatever the enterprise middle continues to do.
+
 ## Software-Defined Networking (SDN)
 
 ```mermaid

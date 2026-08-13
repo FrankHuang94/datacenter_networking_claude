@@ -20,14 +20,34 @@ The optical transceiver — the small, hot-pluggable module that converts electr
 
 The dominant 800G variants are **800G-DR8 and 800G-SR8** (8×100G PAM4) in the **QSFP-DD800** or **OSFP800** form factors. Initial ASPs were high (~$600–800), reflecting the technology challenge and the demand-supply imbalance during the AI surge. A key technology challenge is **200G-per-lane** signaling for the highest-density variants (e.g., 800G over 4 lanes), and for multimode **800G-SR8** the 200G-per-lane VCSEL is a serious engineering hurdle. The supplier landscape mirrors 400G, with all major vendors racing to ramp 800G lines, and the AI demand creating both enormous revenue opportunity and supply constraints (compounded by the HBM and CoWoS bottlenecks upstream, File 05).
 
+## Market Size and Growth (Updated 2026)
+
+Before the generation-by-generation detail, the scale of the market is worth stating, because it has changed by roughly an order of magnitude in a handful of years and every share statement below sits inside it:
+
+| Year | Total optical transceiver market | Growth | Notes |
+|---|---|---|---|
+| 2024 | ~$15B | Ethernet transceivers +93% | First full year of the AI surge |
+| 2025 | ~$24B | ~+60% | 800G the volume generation |
+| 2026 (forecast) | ~$26B and rising through the year | ~+60–65% | 800G+ exceeds 60% of shipments; 1.6T ramps |
+
+The binding constraint in 2026 is not demand or module assembly capacity but **InP EML and laser chip supply**, where demand has been running roughly 30% ahead of available capacity, with the shortage expected to ease toward the end of the year. This is worth internalizing as a structural fact: the datacenter's bandwidth roadmap currently bottlenecks on III-V epitaxy capacity, a slow-moving, capital-intensive, geographically concentrated industry that responds to a demand doubling on a multi-year rather than multi-quarter timescale (Files 09, 23). Longer-range analyst forecasts of a **$100 billion market for AI-cluster optics by 2030** should be read against that constraint rather than as a simple extrapolation.
+
 ## The 1.6T Transceiver Roadmap (2025–2027)
 
-1.6T is the next frontier, standardized via **IEEE 802.3dj** (File 06). The primary variants — **1.6TBASE-SR8/DR8** (8×200G PAM4) — require **200G-per-lane** electrical and optical signaling, which is the defining challenge:
+1.6T is the next frontier, standardized via **IEEE 802.3dj** (File 06), which reached draft D2.4 and later during 2026 with ratification expected within the year. Notably, **1.6T modules began volume shipment ahead of formal ratification**, interoperating on the strength of the stable draft and OIF/MSA plugfests — a pattern the industry has repeated at every recent speed step, and one that transfers interoperability risk from the standards process to the buyer. Roughly 22 million 1.6T units are forecast to ship globally in 2026, with the transition ramping hard through 2026–2027.
+
+The primary variants — **1.6TBASE-SR8/DR8** (8×200G PAM4) — require **200G-per-lane** electrical and optical signaling, which is the defining challenge:
 - **200G-per-lane VCSELs** for multimode 1.6T-SR8 are at the edge of feasibility.
 - The **electrical interface (200GAUI)** to drive 200G per lane to a pluggable is so power-hungry that **LPO (Linear Drive Optics)** and **co-packaged optics (CPO)** become near-mandatory at 1.6T (File 13) — the 1.6T generation is where the pluggable model itself comes under threat.
 - The DSP power for 200G-per-lane PAM4 is extreme, driving the LPO approach (removing the module DSP) and the CPO approach (eliminating the long electrical channel).
 
 1.6T is thus not merely a faster transceiver but the inflection point at which the optical-integration transition becomes unavoidable, and the competition between pluggable 1.6T, LPO, and CPO will define the high end of the market in the late 2020s.
+
+## Beyond 1.6T: The 3.2T and 448G-per-Lane Generation
+
+The generation after 1.6T is already visible in demonstrations rather than merely in roadmaps. **3.2T modules** require **448G per lane** (8×448G), and OFC 2026 was the coming-out event for that signaling rate: live 448G-per-channel demonstrations spanned active copper cables (Semtech's CopperEdge redriver family), modulator drivers and TIAs at 448G per lane, and OIF **CEI-448G** interoperability work involving dozens of member companies. TE Connectivity showed 3.2T co-packaged optics alongside 1.6T linear receive optics (LRO) in a co-packaged-copper-to-CPO architecture.
+
+Two things follow for anyone planning around this generation. First, the electrical channel survives one more doubling, but barely and only over short reaches — which pushes copper toward the inside of the package and the very short intra-rack hop, and hands everything else to optics (Files 13, 24). Second, the intermediate architectures multiply: **LRO** (linear receive, retaining a DSP on the transmit side), LPO, NPO, and full CPO now form a continuum rather than a binary pluggable-versus-co-packaged choice, and different links inside the same cluster will land at different points on it.
 
 ## Chinese Transceiver Suppliers and the Geopolitical Dimension
 
@@ -46,7 +66,7 @@ flowchart LR
 
 Several technology trends are reshaping the transceiver market:
 - **LPO (Linear Drive Optics)** is forecast to grow from essentially 0% in 2022 to a meaningful share (20%+) of the 800G market by the mid-2020s, as the near-term power win (File 13).
-- **CPO (Co-Packaged Optics)** enters pilot deployment at hyperscalers in 2025–2026, threatening pluggables at the highest bandwidths (File 13).
+- **CPO (Co-Packaged Optics)** moved from pilot to **production during 2025–2026** — Broadcom's Tomahawk 6 Davisson (102.4 Tbps optically enabled) shipping and NVIDIA's Quantum-X Photonics and Spectrum-X Photonics switches arriving through 2026, with initial deployments aimed at clusters of 100,000+ accelerators. This is the single most consequential correction to earlier editions of this chapter: CPO is no longer a threat on the horizon to the pluggable model but a shipping alternative at the top of the range (File 13).
 - **Silicon photonics** is increasing its share of 400G/800G transceivers, offering lower cost at volume than InP-based approaches by leveraging CMOS manufacturing, with **Marvell and Broadcom DSPs** inside many modules and SiPh engines from multiple vendors.
 - **Coherent pluggables (ZR/ZR+)** continue to grow for DCI, with 400G-ZR dominated by Acacia/Cisco and Coherent, OpenZR+ products from InnoLight and others entering, and 800G-ZR+ products arriving (File 10).
 
@@ -54,7 +74,7 @@ The overarching trend is the relentless scaling of speed (100G → 400G → 800G
 
 ## The Coherent Transceiver Market
 
-The coherent segment, distinct from the high-volume direct-detect datacenter modules, serves DCI and transport. **400G-ZR** is dominated by **Acacia/Cisco** and **Coherent**, with **Nokia and Infinera** offering coherent in DWDM line-card form factors. **OpenZR+ MSA** products from **InnoLight, HiLink**, and others are entering, commoditizing the coherent-pluggable market, and **800G-ZR+** products from Acacia/Cisco, Coherent, and Nokia/Acacia are arriving in 2024–2025 (File 10). The coherent transceiver market sits at the intersection of the datacenter and transport worlds, and the pluggable-coherent revolution (File 10) is reshaping it by moving coherent function into routers and switches.
+The coherent segment, distinct from the high-volume direct-detect datacenter modules, serves DCI and transport. **400G-ZR** is dominated by **Acacia/Cisco** and **Coherent**, with **Nokia and Infinera** offering coherent in DWDM line-card form factors. **OpenZR+ MSA** products from **InnoLight, HiLink**, and others are entering, commoditizing the coherent-pluggable market, and **800G-ZR+** products from Acacia/Cisco, Coherent, and Nokia have arrived, with Ciena's WaveLogic 6 Nano pluggables and 1.6T WaveLogic 6 Extreme transponder modules anchoring the high end (File 10). Note that **Infinera's coherent line is now part of Nokia** following the February 2025 acquisition (File 23), consolidating the coherent DSP field. The coherent transceiver market sits at the intersection of the datacenter and transport worlds, and the pluggable-coherent revolution (File 10) is reshaping it by moving coherent function into routers and switches.
 
 ## Extended Deep Dive: The Cost Structure of a Transceiver
 

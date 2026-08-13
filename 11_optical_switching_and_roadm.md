@@ -55,6 +55,14 @@ The most striking recent application of optical switching is **inside the datace
 
 The motivations are several. **Topology engineering**: different traffic patterns (and, for AI, different collective-communication algorithms) are best served by different topologies, and OCS lets the fabric adapt. **Incremental upgrade**: OCS decouples the generations of equipment, letting Google upgrade parts of the fabric without forklift replacement. **Elephant flows**: large, long-lived flows can be given dedicated optical circuits, offloading them from the packet-switched fabric. **Power and cost**: eliminating a tier of electronic spine switches (replacing it with passive-ish optical switching) saves power and cost. For AI training specifically, the ability to reconfigure topology to match the communication pattern of a given job — providing non-blocking connectivity for the AllReduce or AllToAll a job needs — is a powerful optimization (File 15). Google's deployment of OCS at datacenter scale is one of the most important networking innovations of the past decade, and other operators are following.
 
+**The TPU pods are where the bet has paid off most visibly.** Google organizes TPUs into cubes joined by OCS, and the scale reached with the **TPU v7 "Ironwood"** generation makes the architectural point concretely: **256-chip pods** built from a handful of cubes, scaling to **superpods of 9,216 chips** across roughly 144 cubes, with the OCS layer providing both the topology and the fault isolation. Three properties compound at that scale:
+
+- **No transceivers or switch power in the inter-cube path.** MEMS mirrors steer light; they do not terminate, retime, or re-transmit it. At 9,216 chips, the electrical packet-switched spine that a comparable Clos would require — and its optics, and its power — simply does not exist in Google's design (Files 13, 25).
+- **Fault tolerance by re-wiring.** When a cube fails, the OCS layer routes around it and the job continues on a slightly smaller topology, rather than the failure propagating into a fabric-wide event. For training runs measured in weeks, this is worth more than peak bandwidth (File 15).
+- **Topology matched to the collective.** The same physical plant presents a torus for one communication pattern and something else for another.
+
+The persistent limitation is unchanged and worth restating: OCS reconfigures in **milliseconds**, so it can serve *job-scale* topology decisions but not packet-scale or even collective-scale ones. It is a scheduling-timescale technology, and every deployment of it — Google's included — pairs it with packet switching for anything faster (see the reconfiguration-time spectrum below).
+
 ## Silicon-Photonic Switches
 
 A frontier technology is the **silicon-photonic switch** — optical switching integrated on a silicon-photonic chip using **microring resonators** or **Mach-Zehnder interferometers (MZIs)** as the switching elements. Unlike MEMS (millisecond reconfiguration) or LCoS (similar), silicon-photonic switches can reconfigure in **nanoseconds**, opening the possibility of fast, fine-grained optical switching that could one day switch individual packets or bursts optically. Current devices are limited in port count (on the order of 64×64) and face challenges (insertion loss, thermal tuning of rings, integration with the rest of the system). A startup ecosystem — **Lightmatter (Passage), Ayar Labs, Celestial AI, Salience Labs** — is developing silicon-photonic switching and interconnect for AI fabrics, where the combination of fast switching and optical bandwidth density could be transformative (Files 13, 24). Silicon-photonic switching is also intimately tied to co-packaged optics, where the optical engine and switching could one day be integrated with the compute.
@@ -64,10 +72,10 @@ A frontier technology is the **silicon-photonic switch** — optical switching i
 The optical-systems vendors that build ROADMs, OXCs, and the surrounding transport platforms include:
 - **Ciena** — Waveserver and GeoMesh platforms, a leader in coherent transport and ROADM systems.
 - **Nokia** — the 1830 Photonic Service Switch (PSS) family and 1350 management.
-- **Infinera** — the GX series and FlexILS open line system, with its distinctive InP PIC technology.
+- **Nokia (including the acquired Infinera)** — the 1830 PSS platform alongside Infinera's GX series and FlexILS open line system, with Infinera's distinctive InP PIC technology now inside Nokia following the February 2025 acquisition (File 23).
 - **Fujitsu** — the 1FINITY platform, prominent in disaggregated/open optical.
 - **Huawei** — OptiX OSN 9800 and related platforms, dominant in many non-Western markets but constrained by export controls in others.
-- **ZTE**, **Coriant (now part of Infinera)**, and others round out the field.
+- **ZTE**, **Coriant (absorbed into Infinera, and thus now Nokia)**, and others round out the field.
 
 Component suppliers — **Lumentum and Coherent** (WSS, amplifiers, lasers), **Calient** (OXC) — supply the building blocks that these systems vendors integrate. The competitive dynamics, including the tension between integrated systems and disaggregated open-optical architectures, are detailed in File 23.
 

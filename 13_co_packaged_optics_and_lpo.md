@@ -75,7 +75,8 @@ The laser problem is the gating reliability and yield issue for SiPh CPO, and ho
 
 - **Ayar Labs TeraPHY**: the highest-profile CPO optical-I/O chiplet, delivering multiple terabits per second of optical bandwidth per chiplet (targeting ~8 Tbps/mm² of optical I/O density), with a UCIe-compatible electrical interface, 16×100G WDM channels per fiber at 1310 nm, and an external (off-chip) laser source ("SuperNova" remote laser). Ayar partners with Intel for manufacturing and has run pilots with hyperscalers; it targets cloud-scale deployment in the mid-2020s, positioning optical I/O as a chiplet that any ASIC can integrate via UCIe.
 - **Intel CPO / Optical Compute Interconnect (OCI)**: Intel demonstrated co-packaged optical I/O (e.g., 4×400G) integrated with switch silicon and has shown OCI for connecting CPUs and accelerators optically, leveraging its silicon-photonics and hybrid-laser expertise.
-- **Broadcom CPO**: Broadcom has targeted CPO-compatible packaging for its highest-bandwidth Tomahawk generations and announced CPO collaborations, while continuing to ship pluggable and LPO solutions; Broadcom's enormous switch-silicon share makes its CPO timing pivotal for the whole industry.
+- **Broadcom CPO**: Broadcom's **Bailly** (51.2T) established the platform and **Tomahawk 6 – Davisson** delivered the industry's first **102.4 Tbps co-packaged** switch, now shipping, while Broadcom continues to ship pluggable and LPO solutions alongside it. Broadcom's enormous switch-silicon share made its CPO timing pivotal for the whole industry, and its decision to ship rather than pilot is what converted CPO from a roadmap item into a procurement decision.
+- **NVIDIA Quantum-X and Spectrum-X Photonics**: NVIDIA's CPO switch families, built on a TSMC silicon-photonics process with micro-ring modulators and detachable fiber connectors, covering both the InfiniBand and Ethernet sides of its fabric portfolio and arriving through 2026 (see the timeline section below for specifications).
 - **Marvell CPO**: Marvell integrates photonics with its Teralynx switch ASICs and demonstrated co-packaged optical I/O, drawing on its Inphi-derived optical-DSP expertise.
 - **Lightmatter Passage**: a photonic interconnect (and photonic-compute) approach co-locating an optical fabric with AI accelerators on a board, claiming large bandwidth-density and power advantages for AI interconnect; backed by substantial funding and a TSMC partnership.
 - **Celestial AI**: a "Photonic Fabric" for AI, targeting optical memory-to-compute and compute-to-compute interconnect with claimed large bandwidth-density advantages over electrical/HBM; in pilot stages.
@@ -92,15 +93,23 @@ CPO's promise is matched by formidable challenges:
 
 - **Standardization and interoperability**: for a healthy multi-vendor ecosystem (rather than vertically integrated proprietary CPO), the ASIC and the optical engine must interoperate across vendors. The **OIF's co-packaging efforts** (a co-packaging framework and electrical interface, sometimes called cPHY) aim to standardize the ASIC-to-optical-engine interface so that engines and ASICs from different vendors can be combined — essential to avoid CPO becoming a set of proprietary silos.
 
-## CPO Adoption Timeline
+## CPO Adoption Timeline — and What Actually Happened
 
-Synthesizing the industry's roadmaps, a plausible adoption timeline is:
-- **2024–2025**: LPO deployment at hyperscalers as the near-term power win at 800G, alongside continued pluggables.
-- **2025–2026**: Near-package optics (NPO) and early CPO in hyperscaler proof-of-concept and pilot deployments (Google, Meta, Microsoft), and at the 102.4 Tbps switch generation where faceplate power becomes critical.
-- **2026–2028**: On-package CPO entering production at hyperscalers for the highest-bandwidth (1.6T-port-class) switch platforms, where pluggable density and power are infeasible.
+Synthesizing the industry's roadmaps, the adoption timeline reads as follows, with the first three rungs now observed rather than projected:
+
+- **2024–2025**: LPO deployment at hyperscalers as the near-term power win at 800G, alongside continued pluggables. *(Happened as expected.)*
+- **2025–2026**: Near-package optics (NPO) and early CPO at the 102.4 Tbps switch generation. *(Happened faster and more decisively than "pilot" suggested — see below.)*
+- **2026–2028**: On-package CPO in production at hyperscalers for the highest-bandwidth switch platforms.
 - **2028–2030**: CPO as the standard approach in high-bandwidth AI fabric deployments, with pluggables relegated to edge and lower-bandwidth ports; optical I/O increasingly integrated even with compute (GPU/accelerator) packages, not just switches.
 
-This timeline is uncertain and contested — LPO's success could delay CPO, and the thermal/manufacturing challenges could slow it — but the direction is clear: optical conversion is migrating inexorably from the faceplate toward the silicon.
+**The correction that matters: CPO shipped.** Earlier editions of this chapter, in line with the industry consensus at the time, framed 2025–2026 as the pilot-and-proof-of-concept window. It was not. Two things landed in production instead:
+
+- **Broadcom Tomahawk 6 "Davisson" (TH6-Davisson)** — announced as the industry's first **102.4 Tbps optically enabled** switch with co-packaged optics, and shipping, doubling the bandwidth of any prior CPO switch. Broadcom guided to significant CPO volume in the first half of 2026, with initial deployments targeted at clusters of **more than 100,000 XPUs**.
+- **NVIDIA Quantum-X Photonics** (InfiniBand, ~115 Tbps per switch across 144 ports of 800G) in early 2026, followed by **Spectrum-X Photonics** Ethernet switches in the second half of 2026 — the **SN6810** at 102.4 Tbps (128×800G) and the **SN6800** at 409.6 Tbps (512×800G). NVIDIA's claimed advantages over a pluggable-based equivalent are instructive because they are not only about power: **4× fewer lasers**, ~**3.5× better power efficiency**, ~**63× better signal integrity**, ~**10× better network resiliency at scale**, and ~**1.3× faster deployment**. The supply chain assembled for it — TSMC, Coherent, Corning, Foxconn, Lumentum, SENKO — is itself evidence of how much industrial coordination CPO required.
+
+Note the resiliency and deployment-speed claims especially. The conventional argument against CPO was serviceability: you cannot swap a co-packaged engine the way you swap a module. The counter-argument that appears to have won at these scales is that a pluggable-based 100,000-GPU fabric contains so many modules and connectors that its *aggregate* failure rate is worse than a co-packaged design with fewer, better-controlled optical interfaces and far fewer lasers. At sufficient scale, eliminating field-replaceable parts can improve availability rather than degrade it — because the parts you eliminated were the ones failing.
+
+The timeline beyond 2026 remains contested — LPO's success continues to defend the pluggable model in the mid-range, and the thermal, laser, and yield challenges described above are real and unsolved in the general case — but the direction is now demonstrated rather than argued: optical conversion is migrating from the faceplate toward the silicon, and the 102.4 Tbps generation is where it crossed over.
 
 ## Extended Deep Dive: The Energy-per-Bit Hierarchy and Why It Drives Everything
 

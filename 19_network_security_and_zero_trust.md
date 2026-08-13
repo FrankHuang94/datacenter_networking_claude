@@ -27,6 +27,21 @@ Encrypting data in transit within and between datacenters is increasingly mandat
 
 The combination of hardware MACsec (for link encryption) and DPU-offloaded IPsec/TLS (for end-to-end and tenant encryption) lets operators encrypt essentially all traffic without sacrificing throughput.
 
+## Post-Quantum Cryptography and the "Harvest Now, Decrypt Later" Problem
+
+A change now working its way through every encryption layer above deserves its own treatment, because it affects long-lived infrastructure decisions rather than day-to-day operations.
+
+The threat model is **"harvest now, decrypt later"**: an adversary with the resources to record encrypted traffic today, and the patience to store it, can decrypt it once a cryptographically relevant quantum computer exists. Shor's algorithm breaks the public-key cryptography (RSA, Diffie-Hellman, elliptic-curve) that underpins **key exchange** in TLS, IPsec, and MACsec key agreement; symmetric ciphers like AES are affected far less severely (Grover's algorithm effectively halves the key strength, which AES-256 absorbs). The practical consequence is that **key establishment**, not bulk encryption, is the exposed surface — and it is exposed *retroactively*, which is what makes the timeline urgent even though no such quantum computer exists today.
+
+Two properties of datacenter traffic make this more than a theoretical concern. First, much of what crosses inter-datacenter links has a **long confidentiality lifetime**: model weights, training data, source code, and regulated customer records remain sensitive for a decade or more. Second, the infrastructure itself is long-lived — a submarine cable has a 25-year design life (File 12), and a switch platform bought today will be in service well into the 2030s.
+
+The standards response is the **NIST post-quantum suite** — the lattice-based **ML-KEM** (key encapsulation, standardized from CRYSTALS-Kyber) and the signature schemes **ML-DSA** (Dilithium) and **SLH-DSA** (SPHINCS+) — and the prevailing deployment pattern is **hybrid**: run a classical and a post-quantum key exchange together and combine the results, so the connection is secure if *either* holds. Hybrid key exchange is already widespread in TLS at the browser and CDN layer, and it is spreading into the infrastructure layers this database covers.
+
+For network hardware, the migration shows up in three places:
+- **Key management for link encryption.** MACsec and IPsec bulk encryption (AES-GCM) is already quantum-resistant enough at 256-bit keys; what must change is the key agreement that establishes those keys. Vendors are shipping this now — **Cisco's Silicon One P200 and the 8223 system** (Files 14, 24) offer line-rate encryption with **post-quantum-resilient key management**, positioned explicitly for scale-across links carrying training traffic between datacenters.
+- **Device identity and firmware signing.** Signature algorithms in secure-boot chains, silicon roots of trust, and certificate hierarchies have long validity periods and are hard to update in the field, which makes them an early migration target (see the supply-chain section below).
+- **Crypto-agility as a procurement requirement.** The most durable lesson is architectural rather than algorithmic: infrastructure should be able to change cipher suites without a hardware replacement. Fixed-function crypto engines that implement exactly one algorithm are now a liability, and buyers of equipment with a ten-year service life should be asking what happens when the algorithm changes — a question that applies as much to the current PQC transition as to whatever follows it.
+
 ## SmartNIC and DPU Security Offload
 
 ```mermaid

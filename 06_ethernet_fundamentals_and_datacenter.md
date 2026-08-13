@@ -81,7 +81,8 @@ The 800G generation is tightly coupled to AI: the NVIDIA GB200 NVL72 and similar
 
 ### 1.6 Terabit Ethernet — Roadmap
 
-1.6 TbE is the next frontier, standardized by the **IEEE 802.3dj** task force (targeting finalization in the mid-2020s):
+1.6 TbE is the next frontier, standardized by the **IEEE 802.3dj** task force, whose scope covers 200 Gb/s, 400 Gb/s, 800 Gb/s, and 1.6 Tb/s operation on 200G-per-lane signaling. As of mid-2026 the draft had progressed through D2.4 and later revisions with **ratification expected during 2026**, having slipped somewhat from the original schedule — while **1.6T optical modules were already shipping in volume** against the stable draft and multi-vendor plugfests. That gap between shipping product and ratified standard is now normal at each speed step, and it shifts interoperability risk onto the buyer: pre-standard modules interoperate because vendors tested them together, not because a standard guarantees it.
+
 - **1.6TBASE-SR8 / DR8** — 8 lanes of 200G PAM4 over multimode or single-mode.
 - The defining challenge is **200G-per-lane electrical signaling** (the **200GAUI** attachment-unit interface), which requires roughly 100+ GBaud PAM4 — an extreme DSP and signal-integrity challenge. Driving 200G per lane all the way to a front-panel pluggable becomes so power-hungry that **LPO (Linear-drive Pluggable Optics)** or **co-packaged optics** become near-mandatory at this speed. 1.6 TbE is thus not just a faster Ethernet; it is the speed at which the optical-integration transition (File 13) becomes unavoidable.
 
@@ -248,6 +249,12 @@ Because of these pathologies, the goal of good fabric design is to use PFC only 
 ### The Ultra Ethernet Consortium
 
 The culmination of these efforts is the **Ultra Ethernet Consortium (UEC)**, an industry effort (AMD, Broadcom, Cisco, Meta, Microsoft, and many others) to define a complete, modernized Ethernet stack purpose-built for AI and HPC — encompassing a new transport (with improved congestion control, multipathing, and out-of-order delivery tolerance), packet spraying for better load balance, and tighter integration of the layers. UEC represents the open-Ethernet ecosystem's coordinated answer to InfiniBand and to NVIDIA's Spectrum-X, aiming to deliver InfiniBand-class AI fabric performance over a fully open, multi-vendor Ethernet standard. Its progress is one of the most consequential developments in AI networking (Files 15, 24).
+
+The UEC published **specification 1.0 in June 2025** — roughly 560 pages spanning NICs, switches, optics, and cables, with the Ultra Ethernet Transport (UET) at its center — followed by a **1.0.2** maintenance revision in 2026. Implementations are now in the field, including UEC support in commercial and open network operating systems. The market backdrop is favorable: **Ethernet passed InfiniBand in AI back-end networks during 2025** and reached roughly two-thirds of AI-cluster switch revenue by 2026. The caveat worth carrying forward (developed further in Files 23 and 24) is that a large share of that AI Ethernet is NVIDIA's own Spectrum-X, so Ethernet's victory over InfiniBand is not yet the open ecosystem's victory over NVIDIA.
+
+### Scale-Up Ethernet: Ethernet Moves Inside the Pod
+
+A second front opened in 2025–2026: applying Ethernet to the **scale-up** domain — the accelerator-to-accelerator mesh inside a rack or pod that has historically belonged to NVLink and, more recently, to UALink. The **OCP ESUN (Ethernet for Scale-Up Networking)** workstream, launched with AMD, Arista, Arm, Broadcom, Cisco, HPE Networking, Marvell, Meta, Microsoft, NVIDIA, OpenAI, and Oracle participating, targets L2/L3 framing and switching for lossless, error-resilient, mostly single-hop pod-internal topologies, with header optimization for the small, latency-critical transfers characteristic of tensor parallelism. Broadcom's **SUE (Scale-Up Ethernet)**, paired with **Tomahawk Ultra** silicon, is the vendor expression of the same idea. ESUN coordinates explicitly with IEEE 802.3 and the UEC rather than forking from them. See File 24 for the strategic picture and File 15 for the architectural stakes.
 
 ## Extended Deep Dive: Buffer Sizing, Incast, and the Microburst Problem
 

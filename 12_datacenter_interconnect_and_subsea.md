@@ -24,7 +24,7 @@ DCI applications span a wide range of distances, each best served by different t
 
 - **Regional DCI (80–500 km)**: connecting datacenters across a region, requiring amplification (EDFA). **ZR+** pluggables (with their stronger DSP and FEC) reach these distances through amplified spans and ROADM networks, and traditional transponder systems also serve this tier.
 
-- **Continental / long-haul DCI (500–3000 km)**: connecting regions across a continent, requiring full coherent transport with multiple amplified spans, ROADMs, and often Raman amplification. This tier uses the highest-performance integrated coherent systems (Ciena WaveLogic, Nokia PSE, Infinera ICE) where the best DSP reach × capacity matters, alongside ZR+ where its reach suffices.
+- **Continental / long-haul DCI (500–3000 km)**: connecting regions across a continent, requiring full coherent transport with multiple amplified spans, ROADMs, and often Raman amplification. This tier uses the highest-performance integrated coherent systems (Ciena WaveLogic, Nokia PSE and the acquired Infinera ICE) where the best DSP reach × capacity matters, alongside ZR+ where its reach suffices.
 
 This continuum maps directly onto the technology choices of File 10: pluggable coherent (ZR/ZR+) is displacing integrated transponders for the shorter tiers, while integrated systems with the best DSPs retain the longest and highest-capacity tiers.
 
@@ -40,7 +40,7 @@ OTN's rich overhead and protection made it the backbone of carrier transport for
 
 ## Metro and Long-Haul DWDM
 
-The metro and long-haul DWDM systems that carry DCI and backbone traffic are where the coherent technology of File 10 is deployed at its highest performance. Modern systems carry **single-carrier 800G coherent wavelengths** (Ciena WaveLogic 5e/6, Nokia PSE-4/5, Infinera ICE6/7) and pack ~96 channels (or 160+ with C+L) onto a fiber pair. Key technologies that extend reach and capacity:
+The metro and long-haul DWDM systems that carry DCI and backbone traffic are where the coherent technology of File 10 is deployed at its highest performance. Modern systems carry **single-carrier 800G coherent wavelengths**, and now 1.6T per wavelength with Ciena's WaveLogic 6 Extreme (Ciena WaveLogic 5e/6, Nokia PSE-4/5/6 and Infinera ICE6/7, the latter now Nokia) and pack ~96 channels (or 160+ with C+L) onto a fiber pair. Key technologies that extend reach and capacity:
 - **C+L-band expansion**: adding L-band amplification and channels roughly doubles the wavelengths per fiber, the most direct way to add capacity to an existing fiber plant.
 - **Ultra-low-loss fiber** (G.654, File 09) for the longest amplifier spans.
 - **Raman + EDFA hybrid amplification** for ultra-long spans where EDFA-only OSNR is insufficient.
@@ -72,12 +72,24 @@ The transition from analog to **digital coherent optics (DCO)** transformed subm
 
 ### Capacity Records and Hyperscaler Cables
 
-Submarine capacity has grown explosively. Modern systems carry **hundreds of terabits per second per cable**; Infinera and others have demonstrated systems approaching or exceeding **1 Pbps** aggregate. The most striking development is the shift in ownership: where submarine cables were once built and owned by consortia of telecom carriers, the **hyperscalers now build and own private cables** to serve their own traffic:
+Submarine capacity has grown explosively. Modern systems carry **hundreds of terabits per second per cable**; Infinera (now Nokia) and others have demonstrated systems approaching or exceeding **1 Pbps** aggregate. The most striking development is the shift in ownership: where submarine cables were once built and owned by consortia of telecom carriers, the **hyperscalers now build and own private cables** to serve their own traffic:
 - **Google** has invested in numerous cables, including **Dunant** (transatlantic, 12 fiber pairs, ~250 Tbps), **Grace Hopper** (transatlantic, ~352 Tbps, with novel fiber-switching at landing), **Curie**, **Equiano** (West Africa), and **Firmina** (Americas).
 - **Meta** has invested in cables including **2Africa** (encircling the African continent, one of the largest cable projects ever) and **MAREA** (transatlantic, co-built with Microsoft).
 - **Microsoft**, **Amazon**, and others likewise invest in private and consortium cables.
 
 This hyperscaler ownership reflects the sheer scale of their traffic — they consume so much intercontinental bandwidth that owning the cable is cheaper than leasing capacity — and gives them control over routing, capacity, and upgrade timing. It is one of the clearest illustrations of how the cloud giants have become infrastructure companies at the deepest physical layer.
+
+### The 2026 Buildout and the Geopolitics of Routing
+
+The AI buildout turned a steady trend into a record. Roughly **40 new submarine systems were expected to enter service during 2026**, and the ownership shift has continued to the point where hyperscalers dominate new capacity outright:
+
+- **Meta's Project Waterworth** is the flagship: a **24-fiber-pair, 50,000+ km** system linking the United States, Brazil, South Africa, and India across five continents — when complete, the longest submarine cable in the world.
+- **Google** has been anchoring multiple new systems in Asia-Pacific alone.
+- **Amazon Web Services** announced **Fastnet**, its first independently owned submarine cable, connecting Maryland to Ireland, expected operational by 2028 — notable because AWS had previously preferred consortium participation.
+
+Two developments deserve emphasis because they change how these systems are planned rather than merely how many are built. First, **route selection has become explicitly geopolitical**: Waterworth's routing was designed specifically to avoid the Red Sea, the South China Sea, and the Strait of Malacca — the chokepoints where cable cuts, whether accidental or deliberate, have repeatedly disrupted intercontinental traffic. Physical route diversity, once an engineering and cost question, is now a security requirement, and it makes cables longer and more expensive on purpose. Second, regulation has moved to match: in **June 2026 the US FCC unanimously approved its first major overhaul of submarine cable licensing in two decades**, tightening security review while creating a faster path for AI-era builds — a rare instance of infrastructure regulation being restructured specifically in response to AI demand.
+
+For the reader tracking the resilience arguments later in this chapter, the practical consequence is that the mitigation for a cable cut is shifting from "restore quickly" toward "route around a chokepoint you chose never to traverse."
 
 ### Submarine Technology Evolution
 
@@ -88,6 +100,10 @@ Submarine technology continues to advance: **open cable systems** (where the wet
 A frontier development that elevates DCI from a replication-and-connectivity concern to a core AI-infrastructure concern is **geographically distributed training** — running a single training job across multiple datacenters connected by DCI links. As frontier models grow and as the power available at any single datacenter site becomes a binding constraint (a large AI cluster can demand more power than a single site's grid connection can supply), operators are driven to spread training across multiple sites, synchronizing over metro and even long-haul DCI. This is enormously challenging, because the latency between datacenters (tens of microseconds for metro, milliseconds for long-haul) dwarfs the intra-datacenter fabric latency, and the bandwidth between sites, while large, is far below the intra-datacenter bisection bandwidth.
 
 The techniques that make distributed-across-datacenters training viable mirror, at a larger scale, the hierarchical strategies of File 15: keep the latency-sensitive, high-frequency collectives (tensor parallelism) within a datacenter, and reserve the inter-datacenter links for the less frequent, more latency-tolerant synchronization (some forms of data parallelism, or asynchronous/periodic synchronization). The DCI links must carry enormous bandwidth (driving demand for high-capacity coherent DWDM and dark-fiber metro links between an operator's datacenters in a region), and the training framework must be designed to tolerate the inter-site latency. This emerging requirement is reshaping how operators plan datacenter campuses (clustering multiple buildings within metro distance, connected by abundant dark fiber and 400G/800G coherent) and is a significant new driver of DCI capacity — the AI buildout extending its bandwidth demands from inside the datacenter out into the metro and regional optical network.
+
+By 2026 this had acquired a name and dedicated products: **scale-across** networking (File 24), the deliberate joining of geographically separate AI clusters into a single training or inference domain. The driver is not ambition but constraint — single-site **power** availability, not silicon supply, now caps how large one cluster can be (File 25), so the next increment of scale must come from another campus. The category's representative products are **Cisco's Silicon One P200 and the 8223 system** (51.2 Tbps, deep buffers, line-rate post-quantum-resilient encryption) and **NVIDIA's Spectrum-XGS**, which extends Spectrum-X congestion control across datacenter boundaries.
+
+The significance for this chapter is a change in what DCI *is*. Historically DCI carried replication, backup, and user-facing traffic — important, but tolerant of the occasional retransmission and measured in aggregate throughput. Scale-across makes the DCI link part of the training fabric, where a loss event stalls a collective and therefore stalls thousands of accelerators. The engineering requirements that follow — deep buffering sized to a bandwidth-delay product measured in hundreds of kilometers, congestion control that behaves across that distance, and encryption at line rate because the traffic now contains model weights and gradients — are why the products above exist as a distinct class rather than as faster versions of what came before.
 
 ## Extended Deep Dive: The Economics and Strategy of Hyperscaler-Owned Subsea Cables
 

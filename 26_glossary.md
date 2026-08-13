@@ -38,7 +38,7 @@ This glossary cross-references the key acronyms and terms used throughout the da
 
 **CLOS / fat-tree** — the dominant datacenter topology with high bisection bandwidth and many equal-cost paths. (File 06)
 
-**CPO (Co-Packaged Optics)** — integrating optical engines into the switch/GPU package to eliminate long electrical SerDes channels. (File 13)
+**CPO (Co-Packaged Optics)** — integrating optical engines into the switch/GPU package to eliminate long electrical SerDes channels; **in production from 2025–2026** (Broadcom TH6-Davisson, NVIDIA Quantum-X and Spectrum-X Photonics). (Files 13, 14, 21)
 
 **CTLE (Continuous-Time Linear Equalizer)** — analog receiver equalizer compensating frequency-dependent channel loss. (Files 02, 06)
 
@@ -96,7 +96,7 @@ This glossary cross-references the key acronyms and terms used throughout the da
 
 **GPUDirect RDMA** — NIC DMA directly to/from GPU memory, bypassing CPU/host memory. (Files 08, 15)
 
-**HBM (High Bandwidth Memory)** — stacked DRAM with a wide (1024-bit) interface via TSV/interposer; HBM1–HBM4. (File 05)
+**HBM (High Bandwidth Memory)** — stacked DRAM with a wide interface via TSV/interposer; 1024-bit through HBM3E, **2048-bit at HBM4** (mass production 2026, ~2 TB/s per stack, logic base die). (File 05)
 
 **HCF (Hollow-Core Fiber)** — fiber guiding light in an air core for lower latency and nonlinearity. (File 24)
 
@@ -178,11 +178,11 @@ This glossary cross-references the key acronyms and terms used throughout the da
 
 **TFLN (Thin-Film Lithium Niobate)** — low-Vπ, high-bandwidth modulator technology. (File 09)
 
-**UALink (Ultra Accelerator Link)** — open scale-up accelerator interconnect standard. (Files 04, 24)
+**UALink (Ultra Accelerator Link)** — open scale-up accelerator interconnect standard; the **200G 1.0 specification** was published in April 2025 (200 Gbps per lane, up to 1,024 accelerators). (Files 04, 15, 24)
 
 **UCIe (Universal Chiplet Interconnect Express)** — open die-to-die chiplet interconnect standard. (File 05)
 
-**Ultra Ethernet (UEC)** — consortium modernizing Ethernet for AI/HPC fabrics. (Files 06, 15)
+**Ultra Ethernet (UEC)** — consortium modernizing Ethernet for AI/HPC fabrics; **specification 1.0 published June 2025**, revision 1.0.2 in 2026. See also UET. (Files 06, 15, 17, 24)
 
 ## V-W-Z
 
@@ -287,6 +287,36 @@ This glossary cross-references the key acronyms and terms used throughout the da
 **WDM (Wavelength Division Multiplexing)** — carrying multiple wavelengths on one fiber (CWDM, DWDM). (File 09)
 
 **XDR (eXtra Data Rate)** — the ~800G-per-port InfiniBand generation. (File 07)
+
+## Terms Added in the 2026 Update
+
+**448G (per lane)** — the electrical signaling generation after 224G, the basis of 3.2T optics; demonstrated in active copper cables, drivers, and TIAs at OFC 2026, with OIF **CEI-448G** the corresponding interface work. (Files 21, 24)
+
+**800 VDC** — the direct-current rack power distribution architecture adopted to feed AI racks approaching 1 MW, transmitting over 150% more power through the same copper than 415/480 VAC and eliminating conversion stages. (File 25)
+
+**Davisson (TH6-Davisson)** — Broadcom's co-packaged-optics variant of Tomahawk 6; the first shipping switch with 102.4 Tbps of optically enabled capacity. (Files 13, 14)
+
+**ESUN (Ethernet for Scale-Up Networking)** — the OCP workstream defining Ethernet framing and switching for the pod-internal scale-up domain, coordinating with IEEE 802.3 and the UEC. (Files 06, 24)
+
+**Helios** — AMD's UALink-based rack-scale system (MI400 series), quoting ~3.6 TB/s of scale-up bandwidth per accelerator across 72 GPUs. (Files 15, 24)
+
+**Ironwood (TPU v7)** — Google's TPU generation scaling to 256-chip pods and 9,216-chip superpods over optical circuit switching. (Files 11, 15)
+
+**LRO (Linear Receive Optics)** — an intermediate architecture retaining a DSP on the transmit path while running the receive path linear; one point on the pluggable-to-CPO continuum alongside LPO and NPO. (Files 13, 21)
+
+**ML-KEM / ML-DSA / SLH-DSA** — the NIST-standardized post-quantum key-encapsulation and signature algorithms (from CRYSTALS-Kyber, Dilithium, and SPHINCS+ respectively), deployed in hybrid with classical algorithms. (File 19)
+
+**NVLink Fusion** — NVIDIA's program licensing NVLink to third-party silicon, a departure from the fully closed posture of earlier NVLink generations. (Files 07, 15, 24)
+
+**PQC (Post-Quantum Cryptography)** — cryptography resistant to quantum attack; in networking it primarily replaces key establishment rather than bulk encryption, motivated by the "harvest now, decrypt later" threat. (File 19)
+
+**Scale-across** — the joining of geographically separated AI clusters into a single training or inference domain, driven by per-site power limits; served by products such as Cisco's P200/8223 and NVIDIA's Spectrum-XGS. (Files 12, 24)
+
+**SUE (Scale-Up Ethernet)** — Broadcom's scale-up Ethernet framing, paired with Tomahawk Ultra silicon. (Files 06, 14, 24)
+
+**UET (Ultra Ethernet Transport)** — the transport at the center of the UEC 1.0 specification: multipath packet spraying, out-of-order delivery with endpoint reassembly, and congestion control that does not depend on PFC. (Files 06, 17, 24)
+
+**Vera Rubin** — NVIDIA's 2026 platform generation, launched as six co-designed chips: the Vera CPU, Rubin GPU, NVLink 6 Switch, ConnectX-9 SuperNIC, BlueField-4 DPU, and Spectrum-6 Ethernet switch. (Files 07, 15)
 
 ## Reference Tables
 

@@ -62,7 +62,9 @@ The defining rhythm of PCIe is the roughly-every-three-years doubling of per-lan
 
 PCIe 6.0 also introduced the **L0p** low-power active state (discussed below), which allows dynamic lane-width reduction without bringing the link down. A x16 PCIe 6.0 link delivers ~126 GB/s per direction.
 
-**PCIe 7.0 (specification targeted ~2025, products later): 128 GT/s.** PCIe 7.0 doubles the rate again to 128 GT/s, retaining PAM4 (so the baud rate rises to 64 Gbaud) and the FLIT/FEC architecture. At 128 GT/s, the channel-loss budget on conventional PCB becomes extreme; PCIe 7.0 will require aggressive equalization, will almost certainly require retimers at very short distances, and is the first generation where **optical PCIe** — running PCIe over fiber using pluggable optical modules — becomes a mainstream consideration rather than a research curiosity. The OIF's **CEI-224G** electrical interface work provides the SerDes basis, and PCI-SIG has an active optical workstream. A x16 PCIe 7.0 link targets on the order of 256 GB/s per direction (512 GB/s aggregate), bandwidth that begins to approach what AI accelerators demand for host-attached memory and coherent fabrics.
+**PCIe 7.0 (specification released to members June 2025; products later): 128 GT/s.** PCIe 7.0 doubles the rate again to 128 GT/s, retaining PAM4 (so the baud rate rises to 64 Gbaud) and the FLIT/FEC architecture. The final specification arrived on schedule — an unusually well-kept promise by the standards-body norms of this database — and it immediately became the electrical basis for **CXL 4.0**, released five months later (File 04). As always with PCIe, specification release precedes shipping silicon by roughly two to three years, so PCIe 7.0 endpoints and switches are a 2027–2028 expectation. At 128 GT/s, the channel-loss budget on conventional PCB becomes extreme; PCIe 7.0 will require aggressive equalization, will almost certainly require retimers at very short distances, and is the first generation where **optical PCIe** — running PCIe over fiber using pluggable optical modules — becomes a mainstream consideration rather than a research curiosity. The OIF's **CEI-224G** electrical interface work provides the SerDes basis, and PCI-SIG has an active optical workstream. A x16 PCIe 7.0 link targets on the order of 256 GB/s per direction (512 GB/s aggregate), bandwidth that begins to approach what AI accelerators demand for host-attached memory and coherent fabrics.
+
+**PCIe 8.0 (draft to members February 2026): 256 GT/s.** PCI-SIG circulated an initial PCIe 8.0 draft to members in February 2026, targeting another doubling to 256 GT/s. The cadence — roughly a three-year specification interval, sustained now across four generations — has held, but the physical assumptions behind it have not: at 256 GT/s the copper channel on an ordinary PCB is measured in centimeters, not inches, which makes the **optical PCIe** work discussed below less a hedge and more the expected physical layer for anything that leaves the immediate neighborhood of the package. Read alongside the 448G-per-lane Ethernet work (File 24) and the CPO transition (File 13), PCIe 8.0 is another instance of the same industry-wide pattern: the *protocol* roadmaps continue their doublings while the *medium* underneath them changes from copper to light.
 
 ## The PCIe Protocol Stack: Three Layers
 
@@ -231,7 +233,8 @@ PCIe does not stand alone; it exists in a competitive landscape of interconnects
 | 4.0 | 16 GT/s | 128b/130b | ~31.5 GB/s | NRZ | AMD-led adoption |
 | 5.0 | 32 GT/s | 128b/130b | ~63 GB/s | NRZ | AI mainstream, CXL 1.1/2.0, retimers common |
 | 6.0 | 64 GT/s | FLIT + FEC | ~126 GB/s | PAM4 | FLIT, mandatory FEC, L0p, CXL 3.0 |
-| 7.0 | 128 GT/s | FLIT + FEC | ~256 GB/s | PAM4 | Optical PCIe, extreme SI, CEI-224G |
+| 7.0 | 128 GT/s | FLIT + FEC | ~256 GB/s | PAM4 | Spec released June 2025; CXL 4.0 basis; optical PCIe, extreme SI, CEI-224G |
+| 8.0 | 256 GT/s | FLIT + FEC | ~512 GB/s | TBD | Draft to members February 2026; copper reach measured in centimeters |
 
 ## Extended Deep Dive: Bandwidth Efficiency, Outstanding Requests, and Real Throughput
 

@@ -32,3 +32,36 @@ DONE | README.md | 1159 | 2026-06-24T08:13:43Z
 
 # === BUILD COMPLETE: 2026-06-24T08:44:43Z ===
 # 26 content files + README; aggregate word count below
+
+# === 2026-08-13 REFRESH: brought roadmap, market, and product facts current; added ESUN/scale-up Ethernet,
+# scale-across, post-quantum cryptography, 800 VDC power, 448G/3.2T optics. See README for the full change list.
+# Word counts after refresh:
+UPDATED | 01_overview_and_strategic_context.md | 4485 | 2026-08-13
+UPDATED | 02_osi_model_and_datacenter_protocol_stack.md | 4353 | 2026-08-13
+UPDATED | 03_pcie_deep_dive.md | 7917 | 2026-08-13
+UPDATED | 04_cxl_deep_dive.md | 6471 | 2026-08-13
+UPDATED | 05_ucie_and_die_to_die_interconnects.md | 5485 | 2026-08-13
+UPDATED | 06_ethernet_fundamentals_and_datacenter.md | 6013 | 2026-08-13
+UPDATED | 07_infiniband_deep_dive.md | 5416 | 2026-08-13
+UPDATED | 08_rdma_and_roce.md | 3449 | 2026-08-13
+UPDATED | 09_optical_networking_fundamentals.md | 4970 | 2026-08-13
+UPDATED | 10_coherent_optical_and_transceiver_ecosystem.md | 4287 | 2026-08-13
+UPDATED | 11_optical_switching_and_roadm.md | 3138 | 2026-08-13
+UPDATED | 12_datacenter_interconnect_and_subsea.md | 3614 | 2026-08-13
+UPDATED | 13_co_packaged_optics_and_lpo.md | 4872 | 2026-08-13
+UPDATED | 14_network_switching_asics.md | 4947 | 2026-08-13
+UPDATED | 15_ai_networking_and_hpc_fabric.md | 5634 | 2026-08-13
+UPDATED | 16_network_os_sdn_and_programmability.md | 3172 | 2026-08-13
+UPDATED | 17_roce_and_lossless_fabric_deployment.md | 3314 | 2026-08-13
+UPDATED | 18_storage_networking.md | 2706 | 2026-08-13
+UPDATED | 19_network_security_and_zero_trust.md | 3036 | 2026-08-13
+UPDATED | 20_network_virtualization_and_overlay.md | 2789 | 2026-08-13
+UPDATED | 21_400g_800g_1pt6t_transceiver_market.md | 3519 | 2026-08-13
+UPDATED | 22_network_telemetry_and_observability.md | 2789 | 2026-08-13
+UPDATED | 23_vendor_landscape_and_competitive_analysis.md | 5503 | 2026-08-13
+UPDATED | 24_future_roadmaps_and_emerging_technologies.md | 5722 | 2026-08-13
+UPDATED | 25_sustainability_power_and_cooling.md | 3621 | 2026-08-13
+UPDATED | 26_glossary.md | 3024 | 2026-08-13
+UPDATED | README.md | 1823 | 2026-08-13
+
+# TOTAL WORDS: 116069
