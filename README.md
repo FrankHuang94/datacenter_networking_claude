@@ -40,6 +40,7 @@ The intended audience spans engineers, architects, product and strategy professi
 24. **[Future Roadmaps and Emerging Technologies](24_future_roadmaps_and_emerging_technologies.md)** ⭐ — Electrical scaling, next-gen coherent, switch-ASIC roadmaps, the 100K-GPU challenge, UALink, photonic computing, quantum, 6G, and memory-semantic networking.
 25. **[Sustainability, Power, and Cooling](25_sustainability_power_and_cooling.md)** — Networking's power share, AI escalation, CPO/LPO savings, liquid cooling, power delivery, carbon, and efficiency metrics.
 26. **[Glossary](26_glossary.md)** — Cross-referenced acronyms and terms.
+27. **[Chinese Simplified Translation (简体中文翻译)](27_chinese_simplified_translation.md)** — A complete, precise Simplified Chinese translation of the entire database (README + Files 01–26), organized section by section, each linking back to its authoritative English source file.
 
 (⭐ denotes a primary, maximum-depth chapter.)
 
@@ -60,6 +61,6 @@ The intended audience spans engineers, architects, product and strategy professi
 
 This database synthesizes publicly available technical knowledge on datacenter networking as of its last update, organized into a coherent, cross-referenced reference. It emphasizes technical depth and roadmap detail, and it favors full prose with tables and worked explanations over bullet outlines. Specific figures (speeds, dates, market shares, product details) reflect the state of the field in the mid-2020s and the published roadmaps current at that time; readers should verify rapidly changing specifics (particularly product roadmaps and market shares) against primary sources.
 
-**Last updated:** 2026-06-24
+**Last updated:** 2026-08-27
 
 **Future additions under consideration:** an expanded standalone index, a units/notation appendix, deeper worked examples and case studies, and periodic refresh of the roadmap and market-share data as the field evolves.
